@@ -67,7 +67,6 @@ class AnsiLogger
 	###
 	constructor: (options) ->
 		@options =
-			'silent':    no # silent disables all output, except for the ERROR log-level
 			'log-level': AnsiLogger::LOG_LEVEL # the log level
 			'no-colors': no # disbles colors if true
 			'date':      no # enables date in the log in stead of just time.
