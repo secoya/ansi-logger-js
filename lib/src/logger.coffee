@@ -224,7 +224,7 @@ class AnsiLogger
 			res = []
 			# colorize each line, so when the string is splitted later,
 			# it will not mess up the colors.
-			return ""+msg unless msg?.split?
+			msg = ""+msg unless msg?.split?
 			res.push @colorize(m, color, style) for m in msg.split("\n")
 			res.join "\n"
 
