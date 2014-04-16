@@ -231,10 +231,10 @@ class AnsiLogger
 
 		# get the formatted current time.
 		str = @formatTime()
-		# get the formatted log-level.
-		str += " " + fll if (fll = @formatLogLevel loglevel)?
 		# get the formatted group
 		str += " " + fg if (fg = @formatGroup())?
+		# get the formatted log-level.
+		str += " " + fll if (fll = @formatLogLevel loglevel)?
 		# now insert the time and log-level on each line.
 		str += " " + msg.replace(/\n/g,"\n#{str} ")
 		# finally printing the output!.
