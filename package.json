@@ -1,7 +1,7 @@
 {
 	"name": "ansi-logger",
 	"description": "Console logger with support for colors and log levels, it complies to the default console.log interface, with methods like log,error,warn,debug and extended with some extra levels for nice formatting purposes.",
-	"version": "1.1.2",
+	"version": "1.1.3",
 	"author": "Secoya A/S <npm@secoya.dk>",
 	"contributors": [
 		{
