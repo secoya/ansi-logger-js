@@ -71,6 +71,9 @@ class AnsiLogger
 			'log-level': AnsiLogger::LOG_LEVEL # the log level
 			'no-colors': no # disbles colors if true
 			'date':      no # enables date in the log in stead of just time.
+			'group':       null # Setting up default group
+			'group-color': null
+
 		@setOptions options if options?
 
 	###
@@ -230,6 +233,8 @@ class AnsiLogger
 		str = @formatTime()
 		# get the formatted log-level.
 		str += " " + fll if (fll = @formatLogLevel loglevel)?
+		# get the formatted group
+		str += " " + fg if (fg = @formatGroup())?
 		# now insert the time and log-level on each line.
 		str += " " + msg.replace(/\n/g,"\n#{str} ")
 		# finally printing the output!.
@@ -273,6 +278,18 @@ class AnsiLogger
 		# append the message if there is any.
 		fll += msg if msg?
 		return fll
+
+	###
+	# Format group if any.
+	# @return String The formatted group
+	###
+	formatGroup: () ->
+		return null unless @options['group']?
+		group = @options['group'].trim()
+		pad = @options['group'].length - group.length
+		padding = ""
+		padding += " " for i in (if pad > 0 then [0..pad-1] else [])
+		return "[#{@colorize group, @options['group-color']}]#{padding}"
 
 	###
 	# Resolve a string representation of the log-level.
