@@ -1,0 +1,31 @@
+{
+	"name": "ansi-logger",
+	"description": "Console logger with support for colors and log levels, it complies to the default console.log interface, with methods like log,error,warn,debug and extended with some extra levels for nice formatting purposes.",
+	"version": "1.0.0",
+	"author": "Secoya A/S <npm@secoya.dk>",
+	"contributors": [
+		{
+			"name": "Brian K. Christensen",
+			"email": "bkc@secoya.dk"
+		}
+	],
+	"dependencies": {
+    "underscore" : "=1.5.2",
+    "cli-color": "=0.2.2",
+    "moment": "=2.0.0",
+	},
+	"keywords": [
+		"log",
+		"logger",
+		"ansi",
+		"colors"
+	],
+	"repository": "git://github.com/secoya/ansi-logger-js",
+	"scripts": {
+		"prepublish": "npm prune"
+	},
+	"engines": {
+		"node": ">= 0.8.0"
+	},
+	"license": "BSD"
+}
