@@ -1,6 +1,7 @@
-_      = require 'underscore'
-moment = require 'moment'
-clc    = require 'cli-color'
+_             = require 'underscore'
+moment        = require 'moment'
+AnsiFormatter = require './ansi'
+formatter     = new AnsiFormatter
 
 ###
 # Ansi output logger.
@@ -35,23 +36,15 @@ class AnsiLogger
 	VERBOSE_LEVEL: AnsiLogger::DEBUG_LEVEL   | AnsiLogger::VERBOSE_MASK
 
 	# The color for each log-level
-	DEFAULT_COLOR: null # what the default color is in the terminal.
-	LOG_COLOR:     AnsiLogger::DEFAULT_COLOR
-	INFO_COLOR:    "blue"
-	DEBUG_COLOR:   "yellow"
-	VERBOSE_COLOR: "magenta"
-	WARN_COLOR:    "red"
-	ERROR_COLOR:   ["red", "inverse"] # This is ugly!, but it makes the background color red.
-	SUCCESS_COLOR: "green"
-	TITLE_COLOR:   "cyan" # title isn't a log level, it is used for making all 'title's look the same. Title is outputted in AnsiLogger::LOG_MASK
-	TIME_COLOR:    "cyan"
-
-	###
-	# Moment.js formats.
-	# @link http://momentjs.com
-	###
-	DATE_FORMAT: "YYYY-MM-DD"
-	TIME_FORAMT: "HH:mm:ss.SSS"
+	LOG_COLOR:     formatter
+	INFO_COLOR:    formatter.blue()
+	DEBUG_COLOR:   formatter.yellow()
+	VERBOSE_COLOR: formatter.magenta()
+	WARN_COLOR:    formatter.red()
+	ERROR_COLOR:   formatter.white().red(bg: true)
+	SUCCESS_COLOR: formatter.green()
+	TITLE_COLOR:   formatter.cyan() # title isn't a log level, it is used for making all 'title's look the same. Title is outputted in AnsiLogger::LOG_MASK
+	TIME_COLOR:    AnsiLogger::TITLE_COLOR
 
 	###
 	# The options object holder.
@@ -67,11 +60,19 @@ class AnsiLogger
 	###
 	constructor: (options) ->
 		@options =
-			'log-level': AnsiLogger::LOG_LEVEL # the log level
-			'no-colors': no # disbles colors if true
-			'date':      no # enables date in the log in stead of just time.
+			'log-level':   AnsiLogger::LOG_LEVEL # the log level
+			'no-colors':   no # disbles colors if true
+
+			###
+			# Moment.js formats.
+			# @link http://momentjs.com
+			###
+			'timeformat':  "HH:mm:ss.SSS"
 			'group':       null # Setting up default group
 			'group-color': null
+			'outputters':
+				out: (msg) -> process.stdout.write msg+"\n"
+				err: (msg) -> process.stderr.write msg+"\n"
 
 		@setOptions options if options?
 
@@ -81,6 +82,7 @@ class AnsiLogger
 	# @return void
 	###
 	setOptions: (options) ->
+		@setColors  options.colors if options.colors?
 		currentLoglevel = @options['log-level']
 
 		for opt, val of @options
@@ -93,9 +95,19 @@ class AnsiLogger
 		# log level changed
 		else if @options['log-level'] isnt currentLoglevel
 			loglevelStr = @resolveLogLevel @options['log-level']
-			loglevelColor = AnsiLogger::[loglevelStr+"_COLOR"]
+			loglevelColor = @[loglevelStr+"_COLOR"]
 
 			@info "Log levels enabled: #{@colorize loglevelStr, loglevelColor}"
+
+	###
+	# Set new colors.
+	# @param Oject<String, Function> colorMap<levelStr, colorFn>
+	# @return void
+	###
+	setColors: (colorMap) ->
+		for level, color of colorMap
+			if level.toUpperCase() in ["LOG","INFO","DEBUG","VERBOSE","WARN","ERROR","SUCCESS","TITLE","TIME"]
+				@[level.toUpperCase()+"_COLOR"] = color
 
 	###
 	# Print an info formatted message.
@@ -105,7 +117,7 @@ class AnsiLogger
 	# @return mixed The first argument is returned
 	###
 	default: () ->
-		@print(msg, AnsiLogger::LOG_MASK, AnsiLogger::LOG_COLOR) for msg in arguments
+		@print(msg, AnsiLogger::LOG_MASK, @LOG_COLOR) for msg in arguments
 		return arguments[0]
 
 	###
@@ -122,7 +134,7 @@ class AnsiLogger
 	# @return mixed The first argument is returned
 	###
 	info: () ->
-		@print(msg, AnsiLogger::INFO_MASK, AnsiLogger::INFO_COLOR) for msg in arguments
+		@print(msg, AnsiLogger::INFO_MASK, @INFO_COLOR) for msg in arguments
 		return arguments[0]
 
 	###
@@ -133,7 +145,7 @@ class AnsiLogger
 	# @return void
 	###
 	debug: () ->
-		@print(msg, AnsiLogger::DEBUG_MASK, AnsiLogger::DEBUG_COLOR) for msg in arguments
+		@print(msg, AnsiLogger::DEBUG_MASK, @DEBUG_COLOR) for msg in arguments
 		return arguments[0]
 
 	###
@@ -144,7 +156,7 @@ class AnsiLogger
 	# @return mixed The first argument is returned
 	###
 	verbose: () ->
-		@print(msg, AnsiLogger::VERBOSE_MASK, AnsiLogger::VERBOSE_COLOR) for msg in arguments
+		@print(msg, AnsiLogger::VERBOSE_MASK, @VERBOSE_COLOR) for msg in arguments
 		return arguments[0]
 
 	###
@@ -155,7 +167,7 @@ class AnsiLogger
 	# @return mixed The first argument is returned
 	###
 	warn: () ->
-		@print(msg, AnsiLogger::WARN_MASK, AnsiLogger::WARN_COLOR) for msg in arguments
+		@print(msg, AnsiLogger::WARN_MASK, @WARN_COLOR) for msg in arguments
 		return arguments[0]
 
 	###
@@ -166,7 +178,7 @@ class AnsiLogger
 	# @return mixed The first argument is returned
 	###
 	error: () ->
-		@print(msg, AnsiLogger::ERROR_MASK, AnsiLogger::ERROR_COLOR) for msg in arguments
+		@print(msg, AnsiLogger::ERROR_MASK, @ERROR_COLOR) for msg in arguments
 		return arguments[0]
 
 	###
@@ -177,7 +189,7 @@ class AnsiLogger
 	# @return mixed The first argument is returned
 	###
 	success: () ->
-		@print(msg, AnsiLogger::SUCCESS_MASK, AnsiLogger::SUCCESS_COLOR) for msg in arguments
+		@print(msg, AnsiLogger::SUCCESS_MASK, @SUCCESS_COLOR) for msg in arguments
 		return arguments[0]
 
 	###
@@ -188,7 +200,7 @@ class AnsiLogger
 	# @return mixed The first argument is returned
 	###
 	title: () ->
-		@print(msg, AnsiLogger::LOG_MASK, AnsiLogger::TITLE_COLOR) for msg in arguments
+		@print(msg, AnsiLogger::LOG_MASK, @TITLE_COLOR) for msg in arguments
 		return arguments[0]
 
 	###
@@ -196,15 +208,12 @@ class AnsiLogger
 	# NB! If no-colors mode is on or no color is given.
 	# then this method just return the message as it is.
 	# @param String msg
-	# @param [ String color ] @link https://github.com/medikoo/cli-color for see the color options.
-	# @param [ String style ] { 'bold', 'italic', 'underline', 'inverse', 'strike' }. NB! some terminals change color, when using bold.
+	# @param [ Function color ]
 	# @return String The colorized message.
 	###
-	colorize: (msg, color, style) ->
+	colorize: (msg, color) ->
 		return msg if @options['no-colors'] or not color?
-		[color, style] = color if _.isArray color
-		if style? then func = clc[color][style] else func = clc[color]
-		return func msg
+		return color msg
 
 	###
 	# Print to console.
@@ -212,22 +221,21 @@ class AnsiLogger
 	# @param String msg
 	# @param [ Number loglevel = AnsiLogger::LOG_MASK ]
 	# @param [ String|Array color ] @see colorize
-	# @param [ String style ] @see colorize
 	#	@return void
 	###
-	print: (msg, loglevel = AnsiLogger::LOG_MASK, color, style) ->
+	print: (msg, loglevel = AnsiLogger::LOG_MASK, color) ->
 		# return if the log-level is higher than the selected the log-level.
 		return unless (loglevel & @options['log-level']) is loglevel
 
-		handleMultiline = (msg, color, style) =>
+		handleMultiline = (msg, color) =>
 			res = []
 			# colorize each line, so when the string is splitted later,
 			# it will not mess up the colors.
 			msg = ""+msg unless msg?.split?
-			res.push @colorize(m, color, style) for m in msg.split("\n")
+			res.push @colorize(m, color) for m in msg.split("\n")
 			res.join "\n"
 
-		msg = handleMultiline msg, color, style
+		msg = handleMultiline msg, color
 
 		# get the formatted current time.
 		str = @formatTime()
@@ -239,9 +247,9 @@ class AnsiLogger
 		str += " " + msg.replace(/\n/g,"\n#{str} ")
 		# finally printing the output!.
 		if (loglevel & AnsiLogger::ERROR_MASK) is AnsiLogger::ERROR_MASK
-			process.stderr.write str+"\n"
+			@options.outputters.err str
 		else
-			process.stdout.write str+"\n"
+			@options.outputters.out str
 
 	###
 	# Format a Date object to string.
@@ -249,12 +257,7 @@ class AnsiLogger
 	# @return String
 	###
 	formatTime: (time = new Date) ->
-		# if no custom format is defined.
-		return "["+@colorize(moment(time).format(AnsiLogger::TIME_FORAMT), AnsiLogger::TIME_COLOR)+"]" unless @options['date']
-		# if commandline options date is true, then date is included.
-		return "["+@colorize(moment(time).format("#{AnsiLogger::DATE_FORMAT} #{AnsiLogger::TIME_FORAMT}"), AnsiLogger::TIME_COLOR)+"]" if @options['date'] is 'true'
-		# if custom date is defined.
-		return "["+@colorize(moment(time).format(@options['date']), AnsiLogger::TIME_COLOR)+"]"
+		return "["+@colorize(moment(time).format(@options['timeformat']), @TIME_COLOR)+"]"
 
 	###
 	# Format the loglevel to the console
@@ -272,7 +275,7 @@ class AnsiLogger
 		fill += " " for i in (if loglevelStr.length < 6 then [loglevelStr.length..6] else [])
 
 		# resolving the color for the log level.
-		loglevelColor = AnsiLogger::[loglevelStr+"_COLOR"]
+		loglevelColor = @[loglevelStr+"_COLOR"]
 		# the formatted log-level
 		fll = "[#{@colorize loglevelStr, loglevelColor}]#{fill}"
 		# append the message if there is any.
@@ -319,7 +322,7 @@ class AnsiLogger
 			mask = AnsiLogger::[level+"_MASK"]
 			if (loglevel & mask) is mask
 				levelStr = @resolveLogLevel mask
-				result.push @colorize levelStr, AnsiLogger::[levelStr+"_COLOR"]
+				result.push @colorize levelStr, @[levelStr+"_COLOR"]
 
 		return result.join ", "
 
@@ -387,6 +390,6 @@ class AnsiLogger
 	# @return void
 	###
 	formatError: (err) ->
-		@print "  "+@formatTypes(err).replace(/\n/g, "\n  "), AnsiLogger::ERROR_MASK, AnsiLogger::ERROR_COLOR
+		@print "  "+@formatTypes(err).replace(/\n/g, "\n  "), AnsiLogger::ERROR_MASK, @ERROR_COLOR
 
 module.exports = AnsiLogger
