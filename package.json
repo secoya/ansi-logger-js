@@ -11,7 +11,8 @@
 	],
 	"dependencies": {
 		"underscore" : "=1.5.2",
-		"moment": "=2.0.0"
+		"moment": "=2.0.0",
+		"cli-color": "=0.2.3"
 	},
 	"keywords": [
 		"log",

@@ -1,7 +1,6 @@
-_             = require 'underscore'
-moment        = require 'moment'
-AnsiFormatter = require './ansi'
-formatter     = new AnsiFormatter
+_      = require 'underscore'
+moment = require 'moment'
+clc    = require 'cli-color'
 
 ###
 # Ansi output logger.
@@ -36,15 +35,15 @@ class AnsiLogger
 	VERBOSE_LEVEL: AnsiLogger::DEBUG_LEVEL   | AnsiLogger::VERBOSE_MASK
 
 	# The color for each log-level
-	LOG_COLOR:     formatter
-	INFO_COLOR:    formatter.blue()
-	DEBUG_COLOR:   formatter.yellow()
-	VERBOSE_COLOR: formatter.magenta()
-	WARN_COLOR:    formatter.red()
-	ERROR_COLOR:   formatter.white().red(bg: true)
-	SUCCESS_COLOR: formatter.green()
-	TITLE_COLOR:   formatter.cyan() # title isn't a log level, it is used for making all 'title's look the same. Title is outputted in AnsiLogger::LOG_MASK
-	TIME_COLOR:    AnsiLogger::TITLE_COLOR
+	LOG_COLOR:     clc
+	INFO_COLOR:    clc.blue
+	DEBUG_COLOR:   clc.yellow
+	VERBOSE_COLOR: clc.magenta
+	WARN_COLOR:    clc.red.bold
+	ERROR_COLOR:   clc.bgRed.white
+	SUCCESS_COLOR: clc.green
+	TITLE_COLOR:   clc.cyan # title isn't a log level, it is used for making all 'title's look the same. Title is outputted in AnsiLogger::LOG_MASK
+	TIME_COLOR:    clc.cyan
 
 	###
 	# The options object holder.
@@ -106,8 +105,8 @@ class AnsiLogger
 	###
 	setColors: (colorMap) ->
 		for level, color of colorMap
-			if level.toUpperCase() in ["LOG","INFO","DEBUG","VERBOSE","WARN","ERROR","SUCCESS","TITLE","TIME"]
-				@[level.toUpperCase()+"_COLOR"] = color
+			if (level = level.toUpperCase()) in ["LOG","INFO","DEBUG","VERBOSE","WARN","ERROR","SUCCESS","TITLE","TIME"]
+				@["#{level}_COLOR"] = color
 
 	###
 	# Print an info formatted message.

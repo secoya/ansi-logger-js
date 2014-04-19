@@ -131,6 +131,19 @@ NB! if the default log level is used, no [level] indication is outputted, this w
 Disables the colors.
 It can be nice if you will redirect the output to a file.
 
+### colors
+Setting the colors of the different log-levels. Each color is function that takes a string and return the string with the ANSI characters added.
+
+```javascript
+var clc = require('cli-color')
+var AnsiLogger = require('ansi-logger');
+var logger = new AnsiLogger({
+  'colors': {
+    'error': clc.bgMagenta
+  }
+});
+```
+
 ### group, default: null
 Sets up a group for the logger:
 
