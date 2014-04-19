@@ -5,8 +5,9 @@
 	"author": "Secoya A/S <npm@secoya.dk>",
 	"contributors": [
 		{
-			"name": "Brian K. Christensen",
-			"email": "bkc@secoya.dk"
+			"name":  "Brian K. Christensen",
+			"email": "briankchristensen@gmail.com",
+			"url":   "https://github.com/thetrompf"
 		}
 	],
 	"dependencies": {
