@@ -252,7 +252,7 @@ class AnsiLogger
 	# @return String The colorized message.
 	###
 	colorize: (msg, color) ->
-		return msg if @options['no-colors'] or not color?
+		return msg if not color? or not process.stdout.isTTY or @options['no-colors']
 		return color msg
 
 	###
