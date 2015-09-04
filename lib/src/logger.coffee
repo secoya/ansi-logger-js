@@ -69,6 +69,7 @@ class AnsiLogger
 			'timeformat':  "HH:mm:ss.SSS"
 			'group':       null # Setting up default group
 			'group-color': null
+			'startup-info': true
 			'outputters':
 				out: (msg) -> process.stdout.write msg+"\n"
 				err: (msg) -> process.stderr.write msg+"\n"
@@ -92,7 +93,7 @@ class AnsiLogger
 			@warn "Invalid log level is trying to be set: #{options['log-level']}, aborting..."
 
 		# log level changed
-		else if @options['log-level'] isnt currentLoglevel
+		else if @options['startup-info'] and @options['log-level'] isnt currentLoglevel
 			loglevelStr = @resolveLogLevel @options['log-level']
 			loglevelColor = @[loglevelStr+"_COLOR"]
 
