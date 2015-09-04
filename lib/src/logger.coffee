@@ -2,6 +2,45 @@ _      = require 'underscore'
 moment = require 'moment'
 clc    = require 'cli-color'
 
+class LogEntry
+	levelText: null
+	levelNumeric: null
+	timestamp: null
+	group: null
+	message: null
+
+###
+# Transform log [entry] to text output.
+# @param LogEntry entry
+# @return String
+###
+textTransformer = (entry) ->
+	# get the formatted current time.
+	str = @formatTime entry.timestamp
+	# get the formatted group
+	str += " " + @formatGroup entry.group if entry.group?
+	# get the formatted log-level.
+	str += " " + levelText if entry.levelText? and (levelText = @formatLogLevel(entry.levelNumeric))?
+	# now insert the time and log-level on each line.
+	str += " " + entry.message.replace(/\n/g,"\n#{str} ")
+
+	return str
+
+###
+# Transform log entry to text output.
+# @param LogEntry entry
+# @return String
+###
+jsonTransformer = (entry) -> JSON.stringify entry
+
+###
+# The identity transformer makes no transformation to the log entry
+# and just returns the [LogEntry] as is.
+# @param LogEntry entry
+# @return LogEntry
+###
+identityTransformer = (entry) -> entry
+
 ###
 # Ansi output logger.
 # This controls what should be ouputted to the console,
@@ -70,6 +109,7 @@ class AnsiLogger
 			'group':       null # Setting up default group
 			'group-color': null
 			'startup-info': true
+			'transformer': textTransformer
 			'outputters':
 				out: (msg) -> process.stdout.write msg+"\n"
 				err: (msg) -> process.stderr.write msg+"\n"
@@ -227,6 +267,8 @@ class AnsiLogger
 		# return if the log-level is higher than the selected the log-level.
 		return unless (loglevel & @options['log-level']) is loglevel
 
+		entry = new LogEntry
+
 		handleMultiline = (msg, color) =>
 			res = []
 			# colorize each line, so when the string is splitted later,
@@ -235,41 +277,37 @@ class AnsiLogger
 			res.push @colorize(m, color) for m in msg.split("\n")
 			res.join "\n"
 
-		msg = handleMultiline msg, color
+		entry.timestamp = moment().format(@options['timeformat'])
+		entry.message = handleMultiline msg, color
+		entry.group = @options.group
+		entry.levelNumeric = loglevel
+		entry.levelText = @resolveLogLevel loglevel
 
-		# get the formatted current time.
-		str = @formatTime()
-		# get the formatted group
-		str += " " + fg if (fg = @formatGroup())?
-		# get the formatted log-level.
-		str += " " + fll if (fll = @formatLogLevel loglevel)?
-		# now insert the time and log-level on each line.
-		str += " " + msg.replace(/\n/g,"\n#{str} ")
 		# finally printing the output!.
 		if (loglevel & AnsiLogger::ERROR_MASK) is AnsiLogger::ERROR_MASK
-			@options.outputters.err str
+			@options.outputters.err.call @, @options.transformer.call @, entry
 		else
-			@options.outputters.out str
+			@options.outputters.out.call @, @options.transformer.call @, entry
 
 	###
-	# Format a Date object to string.
-	# @param [ Date time = new Date ]
+	# Format a object to string.
+	# @param String time
 	# @return String
 	###
-	formatTime: (time = new Date) ->
-		return "["+@colorize(moment(time).format(@options['timeformat']), @TIME_COLOR)+"]"
+	formatTime: (time) ->
+		return "["+@colorize(time, @TIME_COLOR)+"]"
 
 	###
 	# Format the loglevel to the console
 	# @param Number loglevel
-	# @param String msg
 	# @return String The formatted loglevel
 	###
-	formatLogLevel: (loglevel, msg) ->
+	formatLogLevel: (loglevel) ->
 		# no need to ouput the log level, if the default log level is selected.
 		# then it's just a waste of space.
-		return msg if @options['log-level'] is AnsiLogger::LOG_LEVEL
+		return null if @options['log-level'] is AnsiLogger::LOG_LEVEL
 		loglevelStr = @resolveLogLevel(loglevel)
+
 		fill = ""
 		# create the fill, in order to align everything nicely.
 		fill += " " for i in (if loglevelStr.length < 6 then [loglevelStr.length..6] else [])
@@ -279,20 +317,19 @@ class AnsiLogger
 		# the formatted log-level
 		fll = "[#{@colorize loglevelStr, loglevelColor}]#{fill}"
 		# append the message if there is any.
-		fll += msg if msg?
+		#
 		return fll
 
 	###
 	# Format group if any.
 	# @return String The formatted group
 	###
-	formatGroup: () ->
-		return null unless @options['group']?
-		group = @options['group'].trim()
-		pad = @options['group'].length - group.length
+	formatGroup: (group) ->
+		groupTrimmed = group.trim()
+		pad = groupTrimmed.length - group.length
 		padding = ""
 		padding += " " for i in (if pad > 0 then [0..pad-1] else [])
-		return "[#{@colorize group, @options['group-color']}]#{padding}"
+		return "[#{@colorize groupTrimmed, @options['group-color']}]#{padding}"
 
 	###
 	# Resolve a string representation of the log-level.
@@ -393,3 +430,6 @@ class AnsiLogger
 		@print "  "+@formatTypes(err).replace(/\n/g, "\n  "), AnsiLogger::ERROR_MASK, @ERROR_COLOR
 
 module.exports = AnsiLogger
+module.exports.identityTransformer = identityTransformer
+module.exports.jsonTransformer = jsonTransformer
+module.exports.textTransformer = textTransformer
