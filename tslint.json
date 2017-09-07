@@ -3,6 +3,10 @@
         "tslint-secoya"
     ],
     "rules": {
-        "no-relative-imports": false
+        "no-relative-imports": false,
+        "object-literal-key-quotes": [
+            true,
+            "as-needed"
+        ]
     }
 }

@@ -1,5 +1,4 @@
 import * as clc from 'cli-color';
-import * as _ from 'lodash';
 import * as moment from 'moment';
 
 export interface LogEntry {
@@ -11,8 +10,31 @@ export interface LogEntry {
 }
 
 function assertNever(__: never, msg?: string) {
-	throw new Error(msg || '');
+	throw new Error(msg || 'Unsupported option ' + __);
 }
+
+// tslint:disable:no-bitwise
+export enum Mask {
+	ERROR = 0b0000001,
+	WARN = ERROR << 1,
+	SUCCESS = WARN << 1,
+	LOG = SUCCESS << 1,
+	INFO = LOG << 1,
+	DEBUG = INFO << 1,
+	VERBOSE = DEBUG << 1,
+}
+
+export enum Level {
+	SILENT = 0b0000000,
+	ERROR = SILENT | Mask.ERROR,
+	WARN = ERROR | Mask.WARN,
+	SUCCESS = WARN | Mask.SUCCESS,
+	LOG = SUCCESS | Mask.LOG,
+	INFO = LOG | Mask.INFO,
+	DEBUG = INFO | Mask.DEBUG,
+	VERBOSE = DEBUG | Mask.VERBOSE,
+}
+// tslint:enable:no-bitwise
 
 /*
  * Transform log [entry] to text output.
@@ -90,43 +112,17 @@ interface InternalLoggerOptions {
 	transformer: LoggerOptions['transformer'];
 }
 
-// tslint:disable:object-literal-sort-keys
-export const MASKS = {
-	ERROR: 0b0000001,
-	WARN: 0b0000010,
-	SUCCESS: 0b0000100,
-	LOG: 0b0001000,
-	INFO: 0b0010000,
-	DEBUG: 0b0100000,
-	VERBOSE: 0b1000000,
-};
+export type LogMask = keyof typeof Mask;
+export type LogLevel = keyof typeof Level;
 
-export const LEVELS = {
-	SILENT: 0b0000000,
-	ERROR: 0b0000001,
-	WARN: 0b0000011,
-	SUCCESS: 0b0000111,
-	LOG: 0b0001111,
-	INFO: 0b0011111,
-	DEBUG: 0b0111111,
-	VERBOSE: 0b1111111,
-};
-// tslint:enable:object-literal-sort-keys
-
-export type LogMask = keyof typeof MASKS;
-export type LogLevel = keyof typeof LEVELS;
-
-export type LookupMask = { [P in LogMask]: typeof MASKS[P] };
-export type LookupLevel = { [P in LogLevel]: typeof LEVELS[P] };
-
-export type ColorMap = { [P in LogLevel]: clc.Format } & { TIME: clc.Format } & { TITLE: clc.Format };
+export type ColorMap = { [mask: number]: clc.Format; } & { TIME: clc.Format } & { TITLE: clc.Format };
 
 function matchMask(level: number, mask: number): boolean {
 	// tslint:disable-next-line:no-bitwise
 	return (level & mask) === mask;
 }
 
-const knownColors = Object.keys(LEVELS).concat(['TIME', 'TITLE']);
+const knownColors = Object.keys(Level).concat(['TIME', 'TITLE']);
 function isKnownColor(color: string): color is LogLevel | 'TIME' | 'TITLE' {
 	return knownColors.includes(color);
 }
@@ -143,13 +139,17 @@ function isKnownColor(color: string): color is LogLevel | 'TIME' | 'TITLE' {
  * @author Brian K. Christensen, Secoya A/S <bkc@secoya.dk>
  */
 export default class AnsiLogger {
-	private DEBUG_COLOR: clc.Format = clc.yellow;
-	// tslint:disable:react-aware-member-ordering no-bitwise
-
-	// The color for each log-level
-	private ERROR_COLOR: clc.Format = clc.bgRed.white;
-	private INFO_COLOR: clc.Format = clc.blue;
-	private LOG_COLOR: clc.Format = clc;
+	private readonly colors: ColorMap = {
+		[Mask.ERROR]: clc.bgRed.white,
+		[Mask.WARN]: clc.red.bold,
+		[Mask.SUCCESS]: clc.green,
+		[Mask.LOG]: clc,
+		[Mask.INFO]: clc.blue,
+		[Mask.DEBUG]: clc.yellow,
+		[Mask.VERBOSE]: clc.magenta,
+		TIME: clc.cyan,
+		TITLE: clc.cyan,
+	};
 
 	/**
 	 * The options object holder.
@@ -159,14 +159,6 @@ export default class AnsiLogger {
 	 * @var Object
 	 */
 	private options: InternalLoggerOptions;
-	private SUCCESS_COLOR: clc.Format = clc.green;
-	private TIME_COLOR: clc.Format = clc.cyan;
-
-	// title isn't a log level, it is used for making all 'title's look the same.
-	// Title is outputted in AnsiLogger::LOG_INFO
-	private TITLE_COLOR: clc.Format = clc.cyan;
-	private VERBOSE_COLOR: clc.Format = clc.magenta;
-	private WARN_COLOR: clc.Format = clc.red.bold;
 	// tslint:enable:react-aware-member-ordering
 
 	/**
@@ -177,7 +169,7 @@ export default class AnsiLogger {
 		this.options = {
 			group: undefined,
 			'group-color': undefined,
-			'log-level': LEVELS.INFO,
+			'log-level': Level.INFO,
 			'no-colors': false,
 			outputters: {
 				out(msg: string) {
@@ -203,53 +195,66 @@ export default class AnsiLogger {
 		}
 	}
 
+	private handleMultiline(mMsg: string, mColor?: clc.Format | null): string {
+		const res = [];
+		// colorize each line, so when the string is splitted later,
+		// it will not mess up the colors.
+		if ((mMsg != null ? mMsg.split : undefined) == null) {
+			mMsg = `${mMsg}`;
+		}
+		for (const m of Array.from(mMsg.split('\n'))) {
+			res.push(this.colorize(m, mColor));
+		}
+		return res.join('\n');
+	}
+
 	private resolveLevelColor(level: number): clc.Format {
 		switch (true) {
-			case matchMask(level, MASKS.ERROR):
-				return this.ERROR_COLOR;
-			case matchMask(level, MASKS.WARN):
-				return this.WARN_COLOR;
-			case matchMask(level, MASKS.SUCCESS):
-				return this.SUCCESS_COLOR;
-			case matchMask(level, MASKS.INFO):
-				return this.INFO_COLOR;
-			case matchMask(level, MASKS.DEBUG):
-				return this.DEBUG_COLOR;
-			case matchMask(level, MASKS.VERBOSE):
-				return this.VERBOSE_COLOR;
+			case matchMask(level, Mask.ERROR):
+				return this.colors[Mask.ERROR];
+			case matchMask(level, Mask.WARN):
+				return this.colors[Mask.WARN];
+			case matchMask(level, Mask.SUCCESS):
+				return this.colors[Mask.SUCCESS];
+			case matchMask(level, Mask.INFO):
+				return this.colors[Mask.INFO];
+			case matchMask(level, Mask.DEBUG):
+				return this.colors[Mask.DEBUG];
+			case matchMask(level, Mask.VERBOSE):
+				return this.colors[Mask.VERBOSE];
 			default:
-				return this.LOG_COLOR;
+				return this.colors[Mask.LOG];
 		}
 	}
 
 	private setColor(level: LogLevel | 'TITLE' | 'TIME', color: clc.Format) {
 		switch (level) {
 			case 'ERROR':
-				this.ERROR_COLOR = color;
+				this.colors[Mask.ERROR] = color;
 				break;
 			case 'WARN':
-				this.WARN_COLOR = color;
+				this.colors[Mask.WARN] = color;
 				break;
 			case 'SUCCESS':
-				this.SUCCESS_COLOR = color;
+				this.colors[Mask.SUCCESS] = color;
 				break;
 			case 'LOG':
-				this.LOG_COLOR = color;
+				this.colors[Mask.LOG] = color;
 				break;
 			case 'INFO':
-				this.INFO_COLOR = color;
+				this.colors[Mask.INFO] = color;
 				break;
 			case 'DEBUG':
-				this.DEBUG_COLOR = color;
+				this.colors[Mask.DEBUG] = color;
 				break;
 			case 'VERBOSE':
-				this.VERBOSE_COLOR = color;
+				this.colors[Mask.VERBOSE] = color;
 				break;
 			case 'TITLE':
-				this.TITLE_COLOR = color;
+				this.colors.TITLE = color;
 				break;
 			case 'TIME':
-				this.TIME_COLOR = color;
+				this.colors.TIME = color;
 				break;
 			case 'SILENT':
 				break;
@@ -283,7 +288,7 @@ export default class AnsiLogger {
 	 */
 	public debug<T>(firstArg: T, ...__: any[]): T {
 		for (const msg of Array.from(arguments)) {
-			this.print(msg, MASKS.DEBUG, this.DEBUG_COLOR);
+			this.print(msg, Mask.DEBUG, this.colors[Mask.DEBUG]);
 		}
 		return firstArg;
 	}
@@ -297,7 +302,7 @@ export default class AnsiLogger {
 	 */
 	public error<T>(firstArg: T, ...__: any[]): T {
 		for (const msg of Array.from(arguments)) {
-			this.print(msg, MASKS.ERROR, this.ERROR_COLOR);
+			this.print(msg, Mask.ERROR, this.colors[Mask.ERROR]);
 		}
 		return firstArg;
 	}
@@ -308,7 +313,7 @@ export default class AnsiLogger {
 	 * @return void
 	 */
 	public formatError(err: any): void {
-		this.print(`  ${this.formatTypes(err).replace(/\n/g, '\n  ')}`, MASKS.ERROR, this.ERROR_COLOR);
+		this.print(`  ${this.formatTypes(err).replace(/\n/g, '\n  ')}`, Mask.ERROR, this.colors[Mask.ERROR]);
 	}
 
 	/**
@@ -353,11 +358,8 @@ export default class AnsiLogger {
 	public formatLogLevel(loglevel: number) {
 		// no need to ouput the log level, if the default log level is selected.
 		// then it's just a waste of space.
-		if (this.options['log-level'] === LEVELS.LOG) {
-			return null;
-		}
 		const loglevelStr = this.resolveLogLevel(loglevel);
-		const pad = ' '.repeat(loglevelStr.length < 6 ? loglevelStr.length : 0);
+		const pad = ' '.repeat(loglevelStr.length < 6 ? 7 - loglevelStr.length : 0);
 
 		// resolving the color for the log level.
 		const loglevelColor = this.resolveLevelColor(loglevel);
@@ -372,45 +374,45 @@ export default class AnsiLogger {
 	 * @return String
 	 */
 	public formatTime(time: string) {
-		return `[${this.colorize(time, this.TIME_COLOR)}]`;
+		return `[${this.colorize(time, this.colors.TIME)}]`;
 	}
 
 	/**
 	 * Format types to string, some types make resively calls.
 	 * @param mixed type
-	 * @param [ Number seperator = 0 ]
 	 * @param [ Number depth = 3 ] The max depth of recursive calls.
+	 * @param [ Number seperator = 0 ]
 	 * @return String formated type.
 	 */
 	// tslint:disable-next-line:no-reserved-keywords
-	public formatTypes(type: any, seperator?: number, depth?: number) {
+	public formatTypes(type: any, depth?: number, indent?: number) {
 		// making the proper indentation
 		let val;
-		if (seperator == null) {
-			seperator = 0;
+		if (indent == null) {
+			indent = 0;
 		}
 		if (depth == null) {
 			depth = 3;
 		}
 
-		const pad = ' '.repeat(seperator > 0 ? seperator - 1 : 0);
+		const pad = ' '.repeat(indent > 0 ? indent - 1 : 0);
 
 		// primitive types
-		if (_.isNumber(type) || _.isBoolean(type) || _.isUndefined(type) || _.isNull(type)) {
+		if (typeof type === 'number' || typeof type === 'boolean' || type == null) {
 			return `${pad}${type}`;
 		}
 
-		if (_.isString(type)) {
+		if (typeof type === 'string') {
 			return `${pad}'${type}'`;
 		}
 
 		// array is formatted as one-liners
-		if (_.isArray(type) && seperator < depth) {
+		if (Array.isArray(type) && indent < depth) {
 			let str = `${pad}[`;
 			// tslint:disable-next-line:forin
 			for (const key of type.keys()) {
 				val = type[key];
-				str += ` ${this.formatTypes(val, seperator + 1, depth).trim()}`;
+				str += ` ${this.formatTypes(val, indent + 1, depth).trim()}`;
 				str += ((key as any) as number) < type.length - 1 ? ',' : ' ';
 			}
 			return `${str}]`;
@@ -418,13 +420,19 @@ export default class AnsiLogger {
 
 		// hashes is formatted with indentation for every level
 		// of the object, the values of the properties are also resolved.
-		if (_.isObject(type)) {
+		if (typeof type === 'object') {
 			const cname = type.constructor.name;
-			if (cname === 'Object' && seperator < depth) {
+			if (cname === 'Error' || type instanceof Error) {
+				let str = `${pad}${type.message}`;
+				if (type.stack != null) {
+					str += `\n${pad}${type.stack}`;
+				}
+				return str;
+			} else if (cname === 'Object' && indent < depth) {
 				let str = `${pad}{`;
 				for (const key of Object.keys(type)) {
 					val = type[key];
-					str += `\n${pad}  ${key}: ${this.formatTypes(val, seperator + 1, depth).trim()}`;
+					str += `\n${pad}  ${key}: ${this.formatTypes(val, indent + 1, depth).trim()}`;
 				}
 				if (str.length > pad.length + 1) {
 					str += `\n${pad}`;
@@ -434,12 +442,9 @@ export default class AnsiLogger {
 		}
 
 		// print the name of a complex type.
-		const isFunc = _.isFunction(type);
-		if (isFunc || _.isObject(type)) {
+		const isFunc = typeof type === 'function';
+		if (isFunc) {
 			const cname = type.constructor.name;
-			if (cname === 'Error') {
-				return `${pad}${type.message}`;
-			}
 			if (isFunc && cname !== 'Function') {
 				return `${pad}[Function: ${cname}]`;
 			}
@@ -460,13 +465,13 @@ export default class AnsiLogger {
 	 */
 	public info<T>(firstArg: T, ...__: any[]): T {
 		for (const msg of Array.from(arguments)) {
-			this.print(msg, MASKS.INFO, this.INFO_COLOR);
+			this.print(msg, Mask.INFO, this.colors[Mask.INFO]);
 		}
 		return firstArg;
 	}
 
 	/**
-	 * Print an info formatted message.
+	 * Print an default log formatted message.
 	 * NB! AnsiLogger::LOG_MASK must be present in log level.
 	 *
 	 * @params mixed [, mixed] [, mixed]...
@@ -475,7 +480,7 @@ export default class AnsiLogger {
 	// tslint:disable-next-line:no-reserved-keywords
 	public log<T>(firstArg: T, ...__: any[]): T {
 		for (const msg of Array.from(arguments)) {
-			this.print(msg, MASKS.LOG, this.LOG_COLOR);
+			this.print(msg, Mask.LOG, this.colors[Mask.LOG]);
 		}
 		return firstArg;
 	}
@@ -491,36 +496,23 @@ export default class AnsiLogger {
 	public print(msg: string, logMask?: number | null, color?: clc.Format | null): void {
 		// return if the log-level is higher than the selected the log-level.
 		if (logMask == null) {
-			logMask = MASKS.LOG;
+			logMask = Mask.LOG;
 		}
-		console.log(logMask);
+
 		if (!matchMask(this.options['log-level'], logMask)) {
 			return;
 		}
-
-		const handleMultiline = (mMsg: string, mColor?: clc.Format | null) => {
-			const res = [];
-			// colorize each line, so when the string is splitted later,
-			// it will not mess up the colors.
-			if ((mMsg != null ? mMsg.split : undefined) == null) {
-				mMsg = `${mMsg}`;
-			}
-			for (const m of Array.from(mMsg.split('\n'))) {
-				res.push(this.colorize(m, mColor));
-			}
-			return res.join('\n');
-		};
 
 		const entry: LogEntry = {
 			group: this.options.group,
 			levelNumeric: logMask,
 			levelText: this.resolveLogLevel(logMask),
-			message: handleMultiline(msg, color),
+			message: this.handleMultiline(msg, color),
 			timestamp: moment().format(this.options.timeformat),
 		};
 
 		// finally printing the output!.
-		if ((logMask & MASKS.ERROR) === MASKS.ERROR) {
+		if (matchMask(logMask, Mask.ERROR)) {
 			this.options.outputters.err.call(this, this.options.transformer.call(this, entry));
 		} else {
 			this.options.outputters.out.call(this, this.options.transformer.call(this, entry));
@@ -534,8 +526,8 @@ export default class AnsiLogger {
 	 */
 	public resolveCustomLoglevel(loglevel: number) {
 		const result = [];
-		for (const mask of Array.from(Object.values(MASKS))) {
-			if ((loglevel & mask) === mask) {
+		for (const mask of Array.from(Object.values(Mask))) {
+			if (matchMask(loglevel, mask)) {
 				const levelStr = this.resolveLogLevel(mask);
 				result.push(this.colorize(levelStr, this.resolveLevelColor(mask)));
 			}
@@ -551,19 +543,19 @@ export default class AnsiLogger {
 	 */
 	public resolveLogLevel(mask: number) {
 		switch (mask) {
-			case MASKS.ERROR:
+			case Mask.ERROR:
 				return 'ERROR';
-			case MASKS.WARN:
+			case Mask.WARN:
 				return 'WARN';
-			case MASKS.SUCCESS:
+			case Mask.SUCCESS:
 				return 'SUCCESS';
-			case MASKS.INFO:
+			case Mask.INFO:
 				return 'INFO';
-			case MASKS.DEBUG:
+			case Mask.DEBUG:
 				return 'DEBUG';
-			case MASKS.VERBOSE:
+			case Mask.VERBOSE:
 				return 'VERBOSE';
-			case MASKS.LOG:
+			case Mask.LOG:
 				return 'LOG';
 			default:
 				return this.resolveCustomLoglevel(mask);
@@ -603,7 +595,7 @@ export default class AnsiLogger {
 			}
 		}
 
-		if (!_.isNumber(this.options['log-level'] || this.options['log-level'] > LEVELS.VERBOSE)) {
+		if (!Number.isInteger(this.options['log-level']) || this.options['log-level'] > Level.VERBOSE) {
 			this.options['log-level'] = currentLoglevel;
 			this.warn(`Invalid log level is trying to be set: ${options['log-level']}, aborting...`);
 
@@ -624,7 +616,7 @@ export default class AnsiLogger {
 	 */
 	public success<T>(firstArg: T, ...__: any[]): T {
 		for (const msg of Array.from(arguments)) {
-			this.print(msg, MASKS.SUCCESS, this.SUCCESS_COLOR);
+			this.print(msg, Mask.SUCCESS, this.colors[Mask.SUCCESS]);
 		}
 		return firstArg;
 	}
@@ -636,11 +628,11 @@ export default class AnsiLogger {
 	 * @params mixed [, mixed] [, mixed]...
 	 * @return mixed The first argument is returned
 	 */
-	public title<T>(firstArg: T, ...__: any[]): T {
-		for (const msg of Array.from(arguments)) {
-			this.print(msg, MASKS.LOG, this.TITLE_COLOR);
+	public title<T>(msg: T, ...__: any[]): T {
+		for (const m of Array.from(arguments)) {
+			this.print(m, Mask.INFO, this.colors.TITLE);
 		}
-		return firstArg;
+		return msg;
 	}
 
 	/**
@@ -652,7 +644,7 @@ export default class AnsiLogger {
 	 */
 	public verbose<T>(firstArg: T, ...__: any[]): T {
 		for (const msg of Array.from(arguments)) {
-			this.print(msg, MASKS.VERBOSE, this.VERBOSE_COLOR);
+			this.print(msg, Mask.VERBOSE, this.colors[Mask.VERBOSE]);
 		}
 		return firstArg;
 	}
@@ -666,7 +658,7 @@ export default class AnsiLogger {
 	 */
 	public warn<T>(firstArg: T, ...__: any[]): T {
 		for (const msg of Array.from(arguments)) {
-			this.print(msg, MASKS.WARN, this.WARN_COLOR);
+			this.print(msg, Mask.WARN, this.colors[Mask.WARN]);
 		}
 		return firstArg;
 	}

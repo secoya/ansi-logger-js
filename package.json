@@ -9,7 +9,6 @@
 	],
 	"dependencies": {
 		"cli-color": "1.2.0",
-		"lodash": "4.17.4",
 		"moment": "2.18.1",
 		"tslib": "1.7.1"
 	},
@@ -17,10 +16,10 @@
 	"devDependencies": {
 		"@types/cli-color": "0.3.29",
 		"@types/jest": "20.0.8",
-		"@types/lodash": "4.14.74",
 		"@types/moment": "2.13.0",
 		"@types/node": "8.0.27",
 		"jest": "21.0.1",
+		"prettier": "1.6.1",
 		"ts-jest": "21.0.0",
 		"tslint": "5.7.0",
 		"tslint-secoya": "1.0.5",
@@ -59,7 +58,7 @@
 	"scripts": {
 		"build": "tsc -p tsconfig.build.json",
 		"clean": "rm -Rf lib/ types/",
-		"fmt": "prettier --write --tab-width 4 --print-width 120 ",
+		"fmt": "prettier --write --tab-width 4 --print-width 120 --single-quotes --use-tabs --trailing-comma all 'src/**/*.ts'",
 		"lint": "tslint",
 		"test": "jest",
 		"prepublishOnly": "npm run clean && npm test && npm lint && npm build"
