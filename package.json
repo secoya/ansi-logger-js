@@ -1,19 +1,50 @@
 {
-	"name": "ansi-logger",
-	"description": "Console logger with support for colors and log levels, it complies to the default console.log interface, with methods like log,error,warn,debug and extended with some extra levels for nice formatting purposes.",
-	"version": "1.3.0",
 	"author": "Secoya A/S <npm@secoya.dk>",
 	"contributors": [
 		{
-			"name":  "Brian K. Christensen",
+			"name": "Brian K. Christensen",
 			"email": "briankchristensen@gmail.com",
-			"url":   "https://github.com/thetrompf"
+			"url": "https://github.com/thetrompf"
 		}
 	],
 	"dependencies": {
-		"underscore" : "=1.5.2",
-		"moment": "=2.0.0",
-		"cli-color": "=0.2.3"
+		"cli-color": "1.2.0",
+		"lodash": "4.17.4",
+		"moment": "2.18.1",
+		"tslib": "1.7.1"
+	},
+	"description": "Console logger with support for colors and log levels, it complies to the default console.log interface, with methods like log,error,warn,debug and extended with some extra levels for nice formatting purposes.",
+	"devDependencies": {
+		"@types/cli-color": "0.3.29",
+		"@types/jest": "20.0.8",
+		"@types/lodash": "4.14.74",
+		"@types/moment": "2.13.0",
+		"@types/node": "8.0.27",
+		"jest": "21.0.1",
+		"ts-jest": "21.0.0",
+		"tslint": "5.7.0",
+		"tslint-secoya": "1.0.5",
+		"typescript": "2.5.2"
+	},
+	"engines": {
+		"node": ">= 4.8.4"
+	},
+	"jest": {
+		"globals": {
+			"ts-jest": {
+				"tsConfigFile": "tsconfig.test.json"
+			}
+		},
+		"moduleFileExtensions": [
+			"js",
+			"ts"
+		],
+		"testMatch": [
+			"**/__tests__/*.ts"
+		],
+		"transform": {
+			".ts": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+		}
 	},
 	"keywords": [
 		"log",
@@ -21,12 +52,18 @@
 		"ansi",
 		"colors"
 	],
-	"repository": "git://github.com/secoya/ansi-logger-js",
+	"license": "BSD-3-Clause",
+	"main": "lib/index.js",
+	"name": "ansi-logger",
+	"repository": "https://github.com/secoya/ansi-logger-js",
 	"scripts": {
-		"prepublish": "npm prune"
+		"build": "tsc -p tsconfig.build.json",
+		"clean": "rm -Rf lib/ types/",
+		"fmt": "prettier --write --tab-width 4 --print-width 120 ",
+		"lint": "tslint",
+		"test": "jest",
+		"prepublishOnly": "npm run clean && npm test && npm lint && npm build"
 	},
-	"engines": {
-		"node": ">= 0.8.0"
-	},
-	"license": "BSD"
+	"types": "types/index.d.ts",
+	"version": "2.0.0"
 }
