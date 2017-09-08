@@ -1,4 +1,4 @@
-import AnsiLogger, { Level } from '../logger';
+import AnsiLogger, { JSONTransformer, Level, Mask } from '../index';
 // tslint:disable:max-line-length
 
 const getSimpleLogger = (logLevel?: number, err?: any, out?: any) => {
@@ -145,10 +145,9 @@ describe('Logger', () => {
 		const logger = getSimpleLogger(Level.INFO, undefined, out);
 
 		logger.info(`
-			multiline
-			text is outputted
-			correctly
-		`);
+            multiline
+            text is outputted
+            correctly`);
 
 		expect(out.mock.calls[0]).toMatchSnapshot();
 	});
@@ -173,13 +172,89 @@ describe('Logger', () => {
 		const logger = new AnsiLogger({
 			group: 'GROUP',
 			'log-level': Level.DEBUG,
-			'no-colors': false,
+			'no-colors': true,
 			outputters: { out, err },
 			'startup-info': false,
 			timeformat: '0000-00-00 00:00:00',
 		});
 
 		logger.info('info text');
+
+		expect(out.mock.calls[0]).toMatchSnapshot();
+	});
+
+	test('combining log masks creating custom log-level', () => {
+		const err = jest.fn();
+		const out = jest.fn();
+		// tslint:disable-next-line:no-bitwise
+		const logger = getSimpleLogger(Mask.INFO | Mask.ERROR | Mask.VERBOSE, err, out);
+		outputToAllLevels(logger);
+
+		expect(err).toHaveBeenCalledTimes(1);
+		expect(out).toHaveBeenCalledTimes(3);
+
+		expect(err.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [ERROR]   error']);
+		expect(out.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [INFO]    info']);
+		expect(out.mock.calls[1]).toEqual(['[0000-00-00 00:00:00] [VERBOSE] verbose']);
+		expect(out.mock.calls[2]).toEqual(['[0000-00-00 00:00:00] [INFO]    title']);
+	});
+
+	test('simple json output', () => {
+		const err = jest.fn();
+		const out = jest.fn();
+		const logger = getSimpleLogger(Level.VERBOSE, err, out);
+		logger.setOptions({
+			group: 'json',
+			transformer: JSONTransformer,
+		});
+
+		outputToAllLevels(logger);
+
+		expect(err.mock.calls[0]).toEqual([
+			'{"group":"json","levelNumeric":1,"levelText":"ERROR","message":"error","timestamp":"0000-00-00 00:00:00"}',
+		]);
+		expect(out.mock.calls[0]).toEqual([
+			'{"group":"json","levelNumeric":2,"levelText":"WARN","message":"warn","timestamp":"0000-00-00 00:00:00"}',
+		]);
+		expect(out.mock.calls[1]).toEqual([
+			'{"group":"json","levelNumeric":4,"levelText":"SUCCESS","message":"success","timestamp":"0000-00-00 00:00:00"}',
+		]);
+		expect(out.mock.calls[2]).toEqual([
+			'{"group":"json","levelNumeric":8,"levelText":"LOG","message":"log","timestamp":"0000-00-00 00:00:00"}',
+		]);
+		expect(out.mock.calls[3]).toEqual([
+			'{"group":"json","levelNumeric":16,"levelText":"INFO","message":"info","timestamp":"0000-00-00 00:00:00"}',
+		]);
+		expect(out.mock.calls[4]).toEqual([
+			'{"group":"json","levelNumeric":32,"levelText":"DEBUG","message":"debug","timestamp":"0000-00-00 00:00:00"}',
+		]);
+		expect(out.mock.calls[5]).toEqual([
+			'{"group":"json","levelNumeric":64,"levelText":"VERBOSE","message":"verbose","timestamp":"0000-00-00 00:00:00"}',
+		]);
+		expect(out.mock.calls[6]).toEqual([
+			'{"group":"json","levelNumeric":16,"levelText":"INFO","message":"title","timestamp":"0000-00-00 00:00:00"}',
+		]);
+	});
+
+	test('json complex types output', () => {
+		const err = jest.fn();
+		const out = jest.fn();
+		const logger = getSimpleLogger(Level.VERBOSE, err, out);
+		logger.setOptions({ group: 'json', transformer: JSONTransformer });
+
+		logger.debug({ host: 'localhost', name: 'test', pass: 'test', user: 'test' });
+
+		expect(out.mock.calls[0]).toMatchSnapshot();
+	});
+
+	test('text complex types output', () => {
+		const err = jest.fn();
+		const out = jest.fn();
+		const logger = getSimpleLogger(Level.VERBOSE, err, out);
+		logger.setOptions({ group: 'json' });
+
+		logger.debug({ host: 'localhost', name: 'test', pass: 'test', user: 'test' });
+
 		expect(out.mock.calls[0]).toMatchSnapshot();
 	});
 });

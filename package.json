@@ -22,7 +22,7 @@
 		"prettier": "1.6.1",
 		"ts-jest": "21.0.0",
 		"tslint": "5.7.0",
-		"tslint-secoya": "1.0.5",
+		"tslint-secoya": "1.0.6",
 		"typescript": "2.5.2"
 	},
 	"engines": {
@@ -56,12 +56,12 @@
 	"name": "ansi-logger",
 	"repository": "https://github.com/secoya/ansi-logger-js",
 	"scripts": {
-		"build": "tsc -p tsconfig.build.json",
+		"build": "npm run clean && tsc -p tsconfig.build.json",
 		"clean": "rm -Rf lib/ types/",
-		"fmt": "prettier --write --tab-width 4 --print-width 120 --single-quotes --use-tabs --trailing-comma all 'src/**/*.ts'",
-		"lint": "tslint",
+		"fmt": "prettier --write -l 'src/**/*.ts'",
+		"lint": "tslint src/",
 		"test": "jest",
-		"prepublishOnly": "npm run clean && npm test && npm lint && npm build"
+		"prepublishOnly": "npm run clean && npm test && npm run lint && npm run build"
 	},
 	"types": "types/index.d.ts",
 	"version": "2.0.0"
