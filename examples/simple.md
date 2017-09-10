@@ -15,7 +15,7 @@ _Outputs something like:_
 [2017-09-08T14:59:11.607+0200] [INFO]    This is a simple example
 [2017-09-08T14:59:11.608+0200] [ERROR]   Oops, something went horribly wrong!
 [2017-09-08T14:59:11.608+0200] [ERROR]   Error: Oops, something went horribly wrong!
-[2017-09-08T14:59:11.608+0200] [ERROR]       at Object.<anonymous> (~/workspace/ansi-logger-js/examples/tempCodeRunnerFile.md:6:14)
+[2017-09-08T14:59:11.608+0200] [ERROR]       at Object.<anonymous> (~/workspace/ansi-logger-js/examples/simple.md:8:14)
 [2017-09-08T14:59:11.608+0200] [ERROR]       at Module._compile (module.js:573:30)
 [2017-09-08T14:59:11.608+0200] [ERROR]       at Object.Module._extensions..js (module.js:584:10)
 [2017-09-08T14:59:11.608+0200] [ERROR]       at Module.load (module.js:507:32)

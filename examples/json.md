@@ -3,12 +3,11 @@
 ```js
 const Logger = require('../lib/index');
 const logger = new Logger.AnsiLogger({
-	'group': 'json',
-	'log-level': Logger.Level.VERBOSE,
-	'timeformat': 'YYYY-MM-DD\THH:mm:ss.SSSZZ',
-	'no-colors': true,
-	'transformer': Logger.JSONTransformer,
-	'startup-info': false,
+	group: 'json',
+	logLevel: Logger.Level.VERBOSE,
+	timeformat: 'YYYY-MM-DD\THH:mm:ss.SSSZZ',
+	transformer: new Logger.JSONTransformer,
+	startupInfo: false,
 });
 
 logger.success('JSON logging is now supported yay!');

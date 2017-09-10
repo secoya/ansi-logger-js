@@ -2,4 +2,6 @@ import { LogEntry } from './AnsiLogger';
 /**
  * Transform log entry to text output.
  */
-export declare function JSONTransformer(entry: LogEntry): string;
+export declare class JSONTransformer {
+    format(entry: LogEntry): string;
+}

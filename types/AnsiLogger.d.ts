@@ -1,5 +1,3 @@
-/// <reference types="cli-color" />
-import * as clc from 'cli-color';
 export interface LogEntry {
     group?: string;
     levelNumeric: number;
@@ -7,7 +5,9 @@ export interface LogEntry {
     message: string | null;
     timestamp: string;
 }
-export declare type Transformer = (this: AnsiLogger, entry: LogEntry) => any;
+export interface Transformer {
+    format(entry: LogEntry): any;
+}
 export declare enum Mask {
     ERROR = 1,
     WARN = 2,
@@ -28,40 +28,31 @@ export declare enum Level {
     VERBOSE = 127,
 }
 export interface LoggerOptionsInput {
-    colors: {
-        [color: string]: clc.Format;
-    };
     group: string;
-    'group-color': clc.Format;
-    'log-level': number;
-    'no-colors': boolean;
+    logLevel: number;
     outputters: {
         err: (msg: any) => void;
         out: (msg: any) => void;
     };
-    'startup-info': boolean;
+    startupInfo: boolean;
     timeformat: string;
-    transformer: (this: AnsiLogger, entry: LogEntry) => any;
+    transformer: Transformer;
 }
 export interface LoggerOptions {
     group?: LoggerOptionsInput['group'];
-    'group-color'?: LoggerOptionsInput['group-color'];
-    'log-level': LoggerOptionsInput['log-level'];
-    'no-colors': LoggerOptionsInput['no-colors'];
+    logLevel: LoggerOptionsInput['logLevel'];
     outputters: LoggerOptionsInput['outputters'];
-    'startup-info': LoggerOptionsInput['startup-info'];
+    startupInfo: LoggerOptionsInput['startupInfo'];
     timeformat: LoggerOptionsInput['timeformat'];
     transformer: LoggerOptionsInput['transformer'];
 }
 export declare type LogMask = keyof typeof Mask;
 export declare type LogLevel = keyof typeof Level;
-export declare type ColorMap = {
-    [mask: number]: clc.Format;
-} & {
-    TIME: clc.Format;
-} & {
-    TITLE: clc.Format;
-};
+export declare function matchMask(level: number, mask: number): boolean;
+/**
+ * Resolve a string representation of the logLevel.
+ */
+export declare function resolveLogLevel(mask: number): "ERROR" | "WARN" | "SUCCESS" | "LOG" | "INFO" | "DEBUG" | "VERBOSE" | "CUSTOM";
 /**
  * Ansi output logger.
  * This controls what should be ouputted to the console,
@@ -69,7 +60,7 @@ export declare type ColorMap = {
  * you output from all the selected levels.
  * It is possible to disables colors (some teminals don't support colors).
  * you can also specify that you are only interested in output for a specific
- * log-level, then everything else is not outputted.
+ * logLevel, then everything else is not outputted.
  * It is also possible to make the logger silent.
  */
 export declare class AnsiLogger {
@@ -81,31 +72,14 @@ export declare class AnsiLogger {
      */
     private _options;
     /**
-     * Default color scheme
-     * can be overriden by providing a
-     * new full or partial ColorMap.
-     */
-    readonly colors: ColorMap;
-    /**
      * Constructs a Logger, and sets default option values.
      */
     constructor(options?: Partial<LoggerOptionsInput>);
-    private outputStartupInfo();
     /**
-     *
-     * @param level
+     * Print to console.
+     * NB! This will print to the console based on the log level you have enabled.
      */
-    private resolveLevelColor(level);
-    /**
-     * Setting a single color in the `ColorMap`
-     */
-    private setColor(level, color);
-    /**
-     * Colorize the message string.
-     * NB! If no-colors mode is on or no color is given.
-     * then this method just return the message as it is.
-     */
-    colorize(msg: string, color?: clc.Format | null): string;
+    private print(msg, logMask?);
     /**
      * Print a debug formatted message.
      */
@@ -125,10 +99,6 @@ export declare class AnsiLogger {
      */
     formatFunctionCall(functionName: string, args?: any[]): string;
     /**
-     * Format the loglevel to the console
-     */
-    formatLogLevel(this: AnsiLogger, loglevel: number): string;
-    /**
      * Format types to string, some types make resively calls.
      */
     formatTypes(type: any, depth?: number, indent?: number): any;
@@ -141,28 +111,9 @@ export declare class AnsiLogger {
      */
     log<T>(firstArg: T, ...__: any[]): T;
     /**
-     * Print to console.
-     * NB! This will print to the console based on the log level you have enabled.
-     */
-    print(msg: string, logMask?: number | null): void;
-    /**
-     * Resolves custom loglevel string
-     */
-    resolveCustomLoglevel(loglevel: number): string;
-    /**
-     * Resolve a string representation of the log-level.
-     */
-    resolveLogLevel(mask: number): string;
-    /**
-     * Set new colors.
-     */
-    setColors(colorMap: {
-        [level: string]: clc.Format;
-    }): void;
-    /**
      * Sets the options.
      */
-    setOptions(options: Partial<LoggerOptionsInput>, initial?: boolean): void;
+    setOptions(options: Partial<LoggerOptionsInput>): void;
     /**
      * Print a success formatted message.
      */

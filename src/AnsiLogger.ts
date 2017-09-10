@@ -1,4 +1,3 @@
-import * as clc from 'cli-color';
 import * as moment from 'moment';
 import { IdentityTransformer } from './IdentityTransformer';
 import { JSONTransformer } from './JSONTransformer';
@@ -12,10 +11,8 @@ export interface LogEntry {
 	timestamp: string;
 }
 
-export type Transformer = (this: AnsiLogger, entry: LogEntry) => any;
-
-function assertNever(__: never, msg?: string) {
-	throw new Error(msg || 'Unsupported option ' + __);
+export interface Transformer {
+	format(entry: LogEntry): any;
 }
 
 // tslint:disable:no-bitwise
@@ -42,28 +39,22 @@ export enum Level {
 // tslint:enable:no-bitwise
 
 export interface LoggerOptionsInput {
-	colors: { [color: string]: clc.Format };
 	group: string;
-	'group-color': clc.Format;
-	'log-level': number;
-	'no-colors': boolean;
+	logLevel: number;
 	outputters: {
 		err: (msg: any) => void;
 		out: (msg: any) => void;
 	};
-	'startup-info': boolean;
+	startupInfo: boolean;
 	timeformat: string;
-	transformer: (this: AnsiLogger, entry: LogEntry) => any;
+	transformer: Transformer;
 }
 
 export interface LoggerOptions {
 	group?: LoggerOptionsInput['group'];
-	'group-color'?: LoggerOptionsInput['group-color'];
-
-	'log-level': LoggerOptionsInput['log-level'];
-	'no-colors': LoggerOptionsInput['no-colors'];
+	logLevel: LoggerOptionsInput['logLevel'];
 	outputters: LoggerOptionsInput['outputters'];
-	'startup-info': LoggerOptionsInput['startup-info'];
+	startupInfo: LoggerOptionsInput['startupInfo'];
 	timeformat: LoggerOptionsInput['timeformat'];
 	transformer: LoggerOptionsInput['transformer'];
 }
@@ -71,16 +62,33 @@ export interface LoggerOptions {
 export type LogMask = keyof typeof Mask;
 export type LogLevel = keyof typeof Level;
 
-export type ColorMap = { [mask: number]: clc.Format } & { TIME: clc.Format } & { TITLE: clc.Format };
-
 export function matchMask(level: number, mask: number): boolean {
 	// tslint:disable-next-line:no-bitwise
 	return (level & mask) === mask;
 }
 
-const knownColors = Object.keys(Level).concat(['TIME', 'TITLE']);
-function isKnownColorType(color: string): color is LogLevel | 'TIME' | 'TITLE' {
-	return knownColors.includes(color);
+/**
+ * Resolve a string representation of the logLevel.
+ */
+export function resolveLogLevel(mask: number) {
+	switch (mask) {
+		case Mask.ERROR:
+			return 'ERROR';
+		case Mask.WARN:
+			return 'WARN';
+		case Mask.SUCCESS:
+			return 'SUCCESS';
+		case Mask.INFO:
+			return 'INFO';
+		case Mask.DEBUG:
+			return 'DEBUG';
+		case Mask.VERBOSE:
+			return 'VERBOSE';
+		case Mask.LOG:
+			return 'LOG';
+		default:
+			return 'CUSTOM';
+	}
 }
 
 /**
@@ -90,7 +98,7 @@ function isKnownColorType(color: string): color is LogLevel | 'TIME' | 'TITLE' {
  * you output from all the selected levels.
  * It is possible to disables colors (some teminals don't support colors).
  * you can also specify that you are only interested in output for a specific
- * log-level, then everything else is not outputted.
+ * logLevel, then everything else is not outputted.
  * It is also possible to make the logger silent.
  */
 export class AnsiLogger {
@@ -107,22 +115,6 @@ export class AnsiLogger {
 	 */
 	// tslint:disable-next-line:variable-name react-aware-member-ordering
 	private _options: LoggerOptions;
-	/**
-	 * Default color scheme
-	 * can be overriden by providing a
-	 * new full or partial ColorMap.
-	 */
-	public readonly colors: ColorMap = {
-		[Mask.ERROR]: clc.bgRed.white,
-		[Mask.WARN]: clc.red.bold,
-		[Mask.SUCCESS]: clc.green,
-		[Mask.LOG]: clc,
-		[Mask.INFO]: clc.blue,
-		[Mask.DEBUG]: clc.yellow,
-		[Mask.VERBOSE]: clc.magenta,
-		TIME: clc.cyan,
-		TITLE: clc.cyan,
-	};
 
 	/**
 	 * Constructs a Logger, and sets default option values.
@@ -131,9 +123,7 @@ export class AnsiLogger {
 		// tslint:disable:object-literal-key-quotes
 		this._options = {
 			group: undefined,
-			'group-color': undefined,
-			'log-level': Level.INFO,
-			'no-colors': false,
+			logLevel: Level.INFO,
 			outputters: {
 				out(msg: any): void {
 					// Setting up default group // the log level // disbles colors if true
@@ -143,13 +133,13 @@ export class AnsiLogger {
 					process.stderr.write(msg + '\n');
 				},
 			},
-			'startup-info': true,
+			startupInfo: true,
 			/**
 			 * Moment.js formats.
 			 * @link http://momentjs.com
 			 */
 			timeformat: 'YYYY-MM-DD\\THH:mm:ss.SSSZZ',
-			transformer: TextTransformer,
+			transformer: new TextTransformer(),
 		};
 		// tslint:enable:object-literal-key-quotes
 
@@ -163,68 +153,28 @@ export class AnsiLogger {
 	 * NB! This will print to the console based on the log level you have enabled.
 	 */
 	private print(msg: string, logMask?: number | null): void {
-		// return if the log-level is higher than the selected the log-level.
+		// return if the logLevel is higher than the selected the logLevel.
 		if (logMask == null) {
 			logMask = Mask.LOG;
 		}
 
-		if (!matchMask(this._options['log-level'], logMask)) {
+		if (!matchMask(this._options.logLevel, logMask)) {
 			return;
 		}
 
 		const entry: LogEntry = {
 			group: this.options.group,
 			levelNumeric: logMask,
-			levelText: this.resolveLogLevel(logMask),
+			levelText: resolveLogLevel(logMask),
 			message: msg,
 			timestamp: moment().format(this.options.timeformat),
 		};
 
 		// finally printing the output!.
 		if (matchMask(logMask, Mask.ERROR)) {
-			this._options.outputters.err.call(this, this._options.transformer.call(this, entry));
+			this._options.outputters.err.call(this, this._options.transformer.format(entry));
 		} else {
-			this._options.outputters.out.call(this, this._options.transformer.call(this, entry));
-		}
-	}
-
-	/**
-	 * Setting a single color in the `ColorMap`
-	 */
-	private setColor(level: LogLevel | 'TITLE' | 'TIME', color: clc.Format) {
-		switch (level) {
-			case 'ERROR':
-				this.colors[Mask.ERROR] = color;
-				break;
-			case 'WARN':
-				this.colors[Mask.WARN] = color;
-				break;
-			case 'SUCCESS':
-				this.colors[Mask.SUCCESS] = color;
-				break;
-			case 'LOG':
-				this.colors[Mask.LOG] = color;
-				break;
-			case 'INFO':
-				this.colors[Mask.INFO] = color;
-				break;
-			case 'DEBUG':
-				this.colors[Mask.DEBUG] = color;
-				break;
-			case 'VERBOSE':
-				this.colors[Mask.VERBOSE] = color;
-				break;
-			case 'TITLE':
-				this.colors.TITLE = color;
-				break;
-			case 'TIME':
-				this.colors.TIME = color;
-				break;
-			case 'SILENT':
-				break;
-			default:
-				assertNever(level);
-				break;
+			this._options.outputters.out.call(this, this._options.transformer.format(entry));
 		}
 	}
 
@@ -284,7 +234,7 @@ export class AnsiLogger {
 	 */
 	// tslint:disable-next-line:no-reserved-keywords
 	public formatTypes(type: any, depth?: number, indent?: number) {
-		if (this.options.transformer === JSONTransformer || this.options.transformer === IdentityTransformer) {
+		if (this.options.transformer instanceof JSONTransformer || this.options.transformer instanceof IdentityTransformer) {
 			return type;
 		}
 
@@ -387,61 +337,21 @@ export class AnsiLogger {
 	}
 
 	/**
-	 * Resolve a string representation of the log-level.
-	 */
-	public resolveLogLevel(mask: number) {
-		switch (mask) {
-			case Mask.ERROR:
-				return 'ERROR';
-			case Mask.WARN:
-				return 'WARN';
-			case Mask.SUCCESS:
-				return 'SUCCESS';
-			case Mask.INFO:
-				return 'INFO';
-			case Mask.DEBUG:
-				return 'DEBUG';
-			case Mask.VERBOSE:
-				return 'VERBOSE';
-			case Mask.LOG:
-				return 'LOG';
-			default:
-				return 'CUSTOM';
-		}
-	}
-
-	/**
-	 * Set new colors.
-	 */
-	public setColors(colorMap: { [level: string]: clc.Format }) {
-		for (const level of Object.keys(colorMap)) {
-			const color = colorMap[level];
-			const needle = level.toUpperCase();
-			if (isKnownColorType(needle)) {
-				this.setColor(needle, color);
-			}
-		}
-	}
-
-	/**
 	 * Sets the options.
 	 */
 	public setOptions(options: Partial<LoggerOptionsInput>) {
-		if (options.colors != null) {
-			this.setColors(options.colors);
-		}
-		const currentLoglevel = this.options['log-level'];
+		const currentLoglevel = this._options.logLevel;
 		const optionKeys = Object.keys(this.options);
 		for (const key of optionKeys) {
 			const val = (options as any)[key];
 			if (val != null) {
-				(this.options as any)[key] = val;
+				(this._options as any)[key] = val;
 			}
 		}
 
-		if (!Number.isInteger(this._options['log-level']) || this._options['log-level'] > Level.VERBOSE) {
-			this.options['log-level'] = currentLoglevel;
-			this.warn(`Invalid log level is trying to be set: ${options['log-level']}, aborting...`);
+		if (!Number.isInteger(this._options.logLevel) || this._options.logLevel > Level.VERBOSE) {
+			this._options.logLevel = currentLoglevel;
+			this.warn(`Invalid log level is trying to be set: ${options.logLevel}, aborting...`);
 		}
 	}
 

@@ -1,13 +1,14 @@
 import AnsiLogger, { JSONTransformer, Level, Mask } from '../index';
+import { TextTransformer } from '../TextTransformer';
 // tslint:disable:max-line-length
 
 const getSimpleLogger = (logLevel?: number, err?: any, out?: any) => {
 	return new AnsiLogger({
-		'log-level': logLevel == null ? Level.INFO : logLevel,
-		'no-colors': true,
+		logLevel: logLevel == null ? Level.INFO : logLevel,
 		outputters: { err: err || jest.fn(), out: out || jest.fn() },
-		'startup-info': false,
+		startupInfo: false,
 		timeformat: '0000-00-00 00:00:00',
+		transformer: new TextTransformer({ colors: false }),
 	});
 };
 
@@ -171,10 +172,9 @@ describe('Logger', () => {
 		const out = jest.fn();
 		const logger = new AnsiLogger({
 			group: 'GROUP',
-			'log-level': Level.DEBUG,
-			'no-colors': true,
+			logLevel: Level.DEBUG,
 			outputters: { out, err },
-			'startup-info': false,
+			startupInfo: false,
 			timeformat: '0000-00-00 00:00:00',
 		});
 
@@ -205,7 +205,7 @@ describe('Logger', () => {
 		const logger = getSimpleLogger(Level.VERBOSE, err, out);
 		logger.setOptions({
 			group: 'json',
-			transformer: JSONTransformer,
+			transformer: new JSONTransformer(),
 		});
 
 		outputToAllLevels(logger);
@@ -240,7 +240,7 @@ describe('Logger', () => {
 		const err = jest.fn();
 		const out = jest.fn();
 		const logger = getSimpleLogger(Level.VERBOSE, err, out);
-		logger.setOptions({ group: 'json', transformer: JSONTransformer });
+		logger.setOptions({ group: 'json', transformer: new JSONTransformer() });
 
 		logger.debug({ host: 'localhost', name: 'test', pass: 'test', user: 'test' });
 

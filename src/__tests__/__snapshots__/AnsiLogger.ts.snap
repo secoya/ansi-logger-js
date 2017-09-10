@@ -17,7 +17,7 @@ Array [
 
 exports[`Logger multiline output get meta prefix prepended on each line 1`] = `
 Array [
-  "[0000-00-00 00:00:00] [INFO]    
+  "[0000-00-00 00:00:00] [INFO]
 [0000-00-00 00:00:00] [INFO]                multiline
 [0000-00-00 00:00:00] [INFO]                text is outputted
 [0000-00-00 00:00:00] [INFO]                correctly",
