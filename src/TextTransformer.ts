@@ -1,5 +1,5 @@
 import * as clc from 'cli-color';
-import { matchMask, resolveLogLevel, LogEntry, LogLevel, Mask } from './AnsiLogger';
+import { matchMask, resolveLogLevel, LogEntry, LogLevel, Mask, Transformer } from './AnsiLogger';
 
 function assertNever(__: never, msg?: string) {
 	throw new Error(msg || 'Unsupported option ' + __);
@@ -24,7 +24,7 @@ export interface TextTransformerOptions {
 	groupColor?: clc.Format;
 }
 
-export class TextTransformer {
+export class TextTransformer implements Transformer {
 
 	public get options(): Partial<TextTransformerOptions> {
 		return this._options;
