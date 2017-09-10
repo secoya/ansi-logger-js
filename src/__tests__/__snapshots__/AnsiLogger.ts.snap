@@ -17,7 +17,7 @@ Array [
 
 exports[`Logger multiline output get meta prefix prepended on each line 1`] = `
 Array [
-  "[0000-00-00 00:00:00] [INFO]
+  "[0000-00-00 00:00:00] [INFO]    
 [0000-00-00 00:00:00] [INFO]                multiline
 [0000-00-00 00:00:00] [INFO]                text is outputted
 [0000-00-00 00:00:00] [INFO]                correctly",
@@ -37,6 +37,6 @@ Array [
 
 exports[`Logger when logger has a group it is outputted in meta prefix 1`] = `
 Array [
-  "[0000-00-00 00:00:00] [GROUP] [INFO]    info text",
+  "[34m[[36m0000-00-00 00:00:00[34m] [GROUP] [[34mINFO[34m]    info text[39m",
 ]
 `;
