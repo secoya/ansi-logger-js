@@ -19,13 +19,11 @@ export interface TextTransformerOptionsInput {
 }
 
 export interface TextTransformerOptions {
-	colorMap?: TextTransformerOptionsInput['colorMap'];
 	colors: TextTransformerOptionsInput['colors'];
 	groupColor?: clc.Format;
 }
 
 export class TextTransformer implements Transformer {
-
 	public get options(): Partial<TextTransformerOptions> {
 		return this._options;
 	}
@@ -122,21 +120,6 @@ export class TextTransformer implements Transformer {
 	}
 
 	/**
-	 * Resolves custom loglevel string
-	 */
-	// private resolveCustomLoglevel(loglevel: number) {
-	// 	const result = [];
-	// 	for (const mask of Array.from(Object.values(Mask))) {
-	// 		if (matchMask(loglevel, mask)) {
-	// 			const levelStr = this.resolveLogLevel(mask);
-	// 			result.push(this.colorize(levelStr, this.resolveLevelColor(mask)));
-	// 		}
-	// 	}
-
-	// 	return result.join(', ');
-	// }
-
-	/**
 	 *
 	 * @param level
 	 */
@@ -204,11 +187,11 @@ export class TextTransformer implements Transformer {
 			this.setColors(options.colorMap);
 		}
 
-		const optionKeys = Object.keys(this.options);
+		const optionKeys = Object.keys(this.options) as (keyof TextTransformerOptions)[];
 		for (const key of optionKeys) {
-			const val = (options as any)[key];
+			const val = options[key];
 			if (val != null) {
-				(this._options as any)[key] = val;
+				this._options[key] = val;
 			}
 		}
 	}
@@ -253,5 +236,4 @@ export class TextTransformer implements Transformer {
 			}
 		}
 	}
-
 }

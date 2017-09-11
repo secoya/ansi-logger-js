@@ -4,5 +4,9 @@
     "prettier.singleQuote": true,
     "prettier.tabWidth": 4,
     "prettier.trailingComma": "all",
-    "prettier.useTabs": true
+    "prettier.useTabs": true,
+    "[jest-snapshot]": {
+        "files.insertFinalNewline": false,
+        "files.trimTrailingWhitespace": false
+    }
 }

@@ -6,7 +6,6 @@ const getSimpleLogger = (logLevel?: number, err?: any, out?: any) => {
 	return new AnsiLogger({
 		logLevel: logLevel == null ? Level.INFO : logLevel,
 		outputters: { err: err || jest.fn(), out: out || jest.fn() },
-		startupInfo: false,
 		timeformat: '0000-00-00 00:00:00',
 		transformer: new TextTransformer({ colors: false }),
 	});
@@ -174,8 +173,8 @@ describe('Logger', () => {
 			group: 'GROUP',
 			logLevel: Level.DEBUG,
 			outputters: { out, err },
-			startupInfo: false,
 			timeformat: '0000-00-00 00:00:00',
+			transformer: new TextTransformer({ colors: false }),
 		});
 
 		logger.info('info text');
@@ -250,8 +249,9 @@ describe('Logger', () => {
 	test('text complex types output', () => {
 		const err = jest.fn();
 		const out = jest.fn();
+
 		const logger = getSimpleLogger(Level.VERBOSE, err, out);
-		logger.setOptions({ group: 'json' });
+		logger.setOptions({ group: 'text' });
 
 		logger.debug({ host: 'localhost', name: 'test', pass: 'test', user: 'test' });
 

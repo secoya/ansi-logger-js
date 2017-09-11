@@ -45,7 +45,6 @@ export interface LoggerOptionsInput {
 		err: (msg: any) => void;
 		out: (msg: any) => void;
 	};
-	startupInfo: boolean;
 	timeformat: string;
 	transformer: Transformer;
 }
@@ -54,7 +53,6 @@ export interface LoggerOptions {
 	group?: LoggerOptionsInput['group'];
 	logLevel: LoggerOptionsInput['logLevel'];
 	outputters: LoggerOptionsInput['outputters'];
-	startupInfo: LoggerOptionsInput['startupInfo'];
 	timeformat: LoggerOptionsInput['timeformat'];
 	transformer: LoggerOptionsInput['transformer'];
 }
@@ -133,7 +131,6 @@ export class AnsiLogger {
 					process.stderr.write(msg + '\n');
 				},
 			},
-			startupInfo: true,
 			/**
 			 * Moment.js formats.
 			 * @link http://momentjs.com

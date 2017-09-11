@@ -26,17 +26,17 @@ Array [
 
 exports[`Logger text complex types output 1`] = `
 Array [
-  "[0000-00-00 00:00:00] [json] [DEBUG]   {
-[0000-00-00 00:00:00] [json] [DEBUG]     host: 'localhost'
-[0000-00-00 00:00:00] [json] [DEBUG]     name: 'test'
-[0000-00-00 00:00:00] [json] [DEBUG]     pass: 'test'
-[0000-00-00 00:00:00] [json] [DEBUG]     user: 'test'
-[0000-00-00 00:00:00] [json] [DEBUG]   }",
+  "[0000-00-00 00:00:00] [text] [DEBUG]   {
+[0000-00-00 00:00:00] [text] [DEBUG]     host: 'localhost'
+[0000-00-00 00:00:00] [text] [DEBUG]     name: 'test'
+[0000-00-00 00:00:00] [text] [DEBUG]     pass: 'test'
+[0000-00-00 00:00:00] [text] [DEBUG]     user: 'test'
+[0000-00-00 00:00:00] [text] [DEBUG]   }",
 ]
 `;
 
 exports[`Logger when logger has a group it is outputted in meta prefix 1`] = `
 Array [
-  "[34m[[36m0000-00-00 00:00:00[34m] [GROUP] [[34mINFO[34m]    info text[39m",
+  "[0000-00-00 00:00:00] [GROUP] [INFO]    info text",
 ]
 `;
