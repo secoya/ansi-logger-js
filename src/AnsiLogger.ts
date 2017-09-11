@@ -234,7 +234,10 @@ export class AnsiLogger {
 	 */
 	// tslint:disable-next-line:no-reserved-keywords
 	public formatTypes(type: any, depth?: number, indent?: number) {
-		if (this.options.transformer instanceof JSONTransformer || this.options.transformer instanceof IdentityTransformer) {
+		if (
+			this.options.transformer instanceof JSONTransformer ||
+			this.options.transformer instanceof IdentityTransformer
+		) {
 			return type;
 		}
 
