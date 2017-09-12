@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+'use strict';
+
 const tt = require('../lib/TextTransformer');
 const readline = require('readline');
 const fs = require('fs');

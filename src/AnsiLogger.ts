@@ -263,7 +263,7 @@ export class AnsiLogger {
 		if (Array.isArray(type) && indent < depth) {
 			let str = `${pad}[`;
 			// tslint:disable-next-line:forin
-			for (const key of type.keys()) {
+			for (const key of Array.from(type.keys())) {
 				val = type[key];
 				str += ` ${this.formatTypes(val, indent + 1, depth).trim()}`;
 				str += ((key as any) as number) < type.length - 1 ? ',' : ' ';
@@ -283,7 +283,7 @@ export class AnsiLogger {
 				return str;
 			} else if (cname === 'Object' && indent < depth) {
 				let str = `${pad}{`;
-				for (const key of Object.keys(type)) {
+				for (const key of Array.from(Object.keys(type))) {
 					val = type[key];
 					str += `\n${pad}  ${key}: ${this.formatTypes(val, indent + 1, depth).trim()}`;
 				}
@@ -342,7 +342,7 @@ export class AnsiLogger {
 	 */
 	public setOptions(options: Partial<LoggerOptionsInput>) {
 		const currentLoglevel = this._options.logLevel;
-		const optionKeys = Object.keys(this.options);
+		const optionKeys = Array.from(Object.keys(this.options));
 		for (const key of optionKeys) {
 			const val = (options as any)[key];
 			if (val != null) {

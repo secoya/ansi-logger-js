@@ -171,7 +171,7 @@ export class TextTransformer implements Transformer {
 			this.setColors(options.colorMap);
 		}
 
-		const optionKeys = Object.keys(this.options) as (keyof TextTransformerOptions)[];
+		const optionKeys = Array.from(Object.keys(this.options)) as (keyof TextTransformerOptions)[];
 		for (const key of optionKeys) {
 			const val = options[key];
 			if (val != null) {
@@ -211,7 +211,7 @@ export class TextTransformer implements Transformer {
 	 * Set new colors.
 	 */
 	public setColors(colorMap: ColorMap) {
-		for (const level of Object.keys(colorMap) as (keyof ColorMap)[]) {
+		for (const level of Array.from(Object.keys(colorMap)) as (keyof ColorMap)[]) {
 			const color = colorMap[level];
 			this.setColor(level, color);
 		}
