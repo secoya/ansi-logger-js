@@ -1,5 +1,8 @@
 {
 	"author": "Secoya A/S <npm@secoya.dk>",
+	"bin": {
+		"ansi-logger": "./bin/cli.js"
+	},
 	"contributors": [
 		{
 			"name": "Brian K. Christensen",

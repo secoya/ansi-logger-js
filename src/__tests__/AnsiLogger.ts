@@ -27,7 +27,6 @@ const outputToAllLevels = (logger: AnsiLogger) => {
 	logger.info('info');
 	logger.debug('debug');
 	logger.verbose('verbose');
-	logger.title('title');
 };
 
 describe('Logger', () => {
@@ -40,7 +39,6 @@ describe('Logger', () => {
 		expect(logger.info('info')).toBe('info');
 		expect(logger.debug('debug')).toBe('debug');
 		expect(logger.verbose('verbose')).toBe('verbose');
-		expect(logger.title('title')).toBe('title');
 	});
 
 	test('silent log level does not output anything', () => {
@@ -100,7 +98,7 @@ describe('Logger', () => {
 		outputToAllLevels(logger);
 
 		expect(err).toHaveBeenCalledTimes(1);
-		expect(out).toHaveBeenCalledTimes(5);
+		expect(out).toHaveBeenCalledTimes(4);
 	});
 
 	test('debug level outputs error to `err` and warn, success, log, info, title and debug to out and the other levels are silent', () => {
@@ -110,7 +108,7 @@ describe('Logger', () => {
 		outputToAllLevels(logger);
 
 		expect(err).toHaveBeenCalledTimes(1);
-		expect(out).toHaveBeenCalledTimes(6);
+		expect(out).toHaveBeenCalledTimes(5);
 	});
 
 	test('verbose level outputs error to `err` and warn, success, log, info, title, debug and verbose to out and the other levels are silent', () => {
@@ -120,7 +118,7 @@ describe('Logger', () => {
 		outputToAllLevels(logger);
 
 		expect(err).toHaveBeenCalledTimes(1);
-		expect(out).toHaveBeenCalledTimes(7);
+		expect(out).toHaveBeenCalledTimes(6);
 	});
 
 	test('output format for simple types', () => {
@@ -130,14 +128,13 @@ describe('Logger', () => {
 
 		outputToAllLevels(logger);
 
-		expect(err.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [ERROR]   error']);
+		expect(err.mock.calls[0][0].toString()).toEqual('[0000-00-00 00:00:00] [ERROR]   error');
 		expect(out.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [WARN]    warn']);
 		expect(out.mock.calls[1]).toEqual(['[0000-00-00 00:00:00] [SUCCESS] success']);
 		expect(out.mock.calls[2]).toEqual(['[0000-00-00 00:00:00] [LOG]     log']);
 		expect(out.mock.calls[3]).toEqual(['[0000-00-00 00:00:00] [INFO]    info']);
 		expect(out.mock.calls[4]).toEqual(['[0000-00-00 00:00:00] [DEBUG]   debug']);
 		expect(out.mock.calls[5]).toEqual(['[0000-00-00 00:00:00] [VERBOSE] verbose']);
-		expect(out.mock.calls[6]).toEqual(['[0000-00-00 00:00:00] [INFO]    title']);
 	});
 
 	test('multiline output get meta prefix prepended on each line', () => {
@@ -190,12 +187,11 @@ describe('Logger', () => {
 		outputToAllLevels(logger);
 
 		expect(err).toHaveBeenCalledTimes(1);
-		expect(out).toHaveBeenCalledTimes(3);
+		expect(out).toHaveBeenCalledTimes(2);
 
 		expect(err.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [ERROR]   error']);
 		expect(out.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [INFO]    info']);
 		expect(out.mock.calls[1]).toEqual(['[0000-00-00 00:00:00] [VERBOSE] verbose']);
-		expect(out.mock.calls[2]).toEqual(['[0000-00-00 00:00:00] [INFO]    title']);
 	});
 
 	test('simple json output', () => {
@@ -229,9 +225,6 @@ describe('Logger', () => {
 		]);
 		expect(out.mock.calls[5]).toEqual([
 			'{"group":"json","levelNumeric":64,"levelText":"VERBOSE","message":"verbose","timestamp":"0000-00-00 00:00:00"}',
-		]);
-		expect(out.mock.calls[6]).toEqual([
-			'{"group":"json","levelNumeric":16,"levelText":"INFO","message":"title","timestamp":"0000-00-00 00:00:00"}',
 		]);
 	});
 

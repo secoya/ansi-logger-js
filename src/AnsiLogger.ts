@@ -5,7 +5,7 @@ import { TextTransformer } from './TextTransformer';
 
 export interface LogEntry {
 	group?: string;
-	levelNumeric: number;
+	levelNumeric: Mask;
 	levelText: string | null;
 	message: string | null;
 	timestamp: string;
@@ -18,12 +18,12 @@ export interface Transformer {
 // tslint:disable:no-bitwise
 export enum Mask {
 	ERROR = 0b0000001,
-	WARN = ERROR << 1,
-	SUCCESS = WARN << 1,
-	LOG = SUCCESS << 1,
-	INFO = LOG << 1,
-	DEBUG = INFO << 1,
-	VERBOSE = DEBUG << 1,
+	WARN = 0b0000010,
+	SUCCESS = 0b0000100,
+	LOG = 0b0001000,
+	INFO = 0b0010000,
+	DEBUG = 0b0100000,
+	VERBOSE = 0b1000000,
 }
 
 export enum Level {
@@ -60,7 +60,7 @@ export interface LoggerOptions {
 export type LogMask = keyof typeof Mask;
 export type LogLevel = keyof typeof Level;
 
-export function matchMask(level: number, mask: number): boolean {
+export function matchMask<T extends Mask>(level: number, mask: T): level is T {
 	// tslint:disable-next-line:no-bitwise
 	return (level & mask) === mask;
 }
@@ -68,7 +68,7 @@ export function matchMask(level: number, mask: number): boolean {
 /**
  * Resolve a string representation of the logLevel.
  */
-export function resolveLogLevel(mask: number) {
+export function resolveLogLevel(mask: Mask): string {
 	switch (mask) {
 		case Mask.ERROR:
 			return 'ERROR';
@@ -76,16 +76,17 @@ export function resolveLogLevel(mask: number) {
 			return 'WARN';
 		case Mask.SUCCESS:
 			return 'SUCCESS';
+		case Mask.LOG:
+			return 'LOG';
 		case Mask.INFO:
 			return 'INFO';
 		case Mask.DEBUG:
 			return 'DEBUG';
 		case Mask.VERBOSE:
 			return 'VERBOSE';
-		case Mask.LOG:
-			return 'LOG';
 		default:
-			return 'CUSTOM';
+			const x: never = mask;
+			throw new Error(`Unsupported option ${x}`);
 	}
 }
 
@@ -125,17 +126,17 @@ export class AnsiLogger {
 			outputters: {
 				out(msg: any): void {
 					// Setting up default group // the log level // disbles colors if true
-					process.stdout.write(msg + '\n');
+					process.stdout.write(msg);
 				},
 				err(msg: any): void {
-					process.stderr.write(msg + '\n');
+					process.stderr.write(msg);
 				},
 			},
 			/**
 			 * Moment.js formats.
 			 * @link http://momentjs.com
 			 */
-			timeformat: 'YYYY-MM-DD\\THH:mm:ss.SSSZZ',
+			timeformat: 'YYYY-MM-DD HH:mm:ss.SSSZZ',
 			transformer: new TextTransformer(),
 		};
 		// tslint:enable:object-literal-key-quotes
@@ -363,16 +364,6 @@ export class AnsiLogger {
 			this.print(msg, Mask.SUCCESS);
 		}
 		return firstArg;
-	}
-
-	/**
-	 * Print a title formatted message.
-	 */
-	public title<T>(msg: T, ...__: any[]): T {
-		for (const m of Array.from(arguments)) {
-			this.print(m, Mask.INFO);
-		}
-		return msg;
 	}
 
 	/**
