@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-const { TextTransformer } = require('../lib/TextTransformer');
+const tt = require('../lib/TextTransformer');
 const readline = require('readline');
 const fs = require('fs');
 
-const transformer = new TextTransformer({
+const transformer = new tt.TextTransformer({
 	forceColors: true,
 });
 
