@@ -1,6 +1,6 @@
-node_modules/
-lib/
-types/
+/node_modules/
+/lib/
+/types/
 
 *.log
 *.tar.gz

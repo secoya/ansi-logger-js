@@ -3,6 +3,7 @@
 	"bin": {
 		"ansi-logger": "./bin/cli.js"
 	},
+	"bugs": "https://github.com/secoya/ansi-logger-js",
 	"contributors": [
 		{
 			"name": "Brian K. Christensen",
@@ -17,36 +18,16 @@
 	},
 	"description": "Console logger with support for colors and log levels, it complies to the default console.log interface, with methods like log,error,warn,debug and extended with some extra levels for nice formatting purposes.",
 	"devDependencies": {
-		"@types/cli-color": "0.3.29",
-		"@types/jest": "20.0.8",
-		"@types/moment": "2.13.0",
-		"@types/node": "8.0.28",
-		"jest": "21.0.2",
-		"prettier": "1.6.1",
-		"ts-jest": "21.0.0",
+		"@types/jest": "21.1.1",
+		"jest": "21.2.1",
+		"prettier": "1.7.3",
+		"ts-jest": "21.0.1",
 		"tslint": "5.7.0",
 		"tslint-secoya": "1.0.6",
-		"typescript": "2.5.2"
+		"typescript": "2.5.3"
 	},
 	"engines": {
-		"node": ">= 4.8.4"
-	},
-	"jest": {
-		"globals": {
-			"ts-jest": {
-				"tsConfigFile": "tsconfig.test.json"
-			}
-		},
-		"moduleFileExtensions": [
-			"js",
-			"ts"
-		],
-		"testMatch": [
-			"**/__tests__/*.ts"
-		],
-		"transform": {
-			".ts": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-		}
+		"node": ">=4.8.4"
 	},
 	"keywords": [
 		"log",
@@ -57,15 +38,19 @@
 	"license": "BSD-3-Clause",
 	"main": "lib/index.js",
 	"name": "ansi-logger",
+	"optionalDependencies": {
+		"@types/cli-color": "^0.3.29",
+		"@types/node": "^8.0.31"
+	},
 	"repository": "https://github.com/secoya/ansi-logger-js",
 	"scripts": {
 		"build": "npm run clean && tsc -p tsconfig.build.json",
 		"clean": "rm -Rf lib/ types/",
 		"fmt": "prettier --write -l 'src/**/*.ts'",
 		"lint": "tslint src/",
-		"test": "jest",
+		"test": "jest --config jest.config.json",
 		"prepublishOnly": "npm run clean && npm test && npm run lint && npm run build"
 	},
 	"types": "types/index.d.ts",
-	"version": "2.0.2"
+	"version": "2.0.3"
 }
