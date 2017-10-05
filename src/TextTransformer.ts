@@ -11,7 +11,7 @@ export interface TextTransformerOptionsInput {
 }
 
 export interface TextTransformerOptions {
-	colors: TextTransformerOptionsInput['colors'];
+	colors: Partial<TextTransformerOptionsInput['colors']>;
 	forceColors: TextTransformerOptionsInput['forceColors'];
 }
 
