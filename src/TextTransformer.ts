@@ -5,14 +5,14 @@ export type ColorType = 'ERROR' | 'WARN' | 'SUCCESS' | 'LOG' | 'INFO' | 'DEBUG' 
 export type ColorMap = { [P in ColorType]: clc.Format };
 
 export interface TextTransformerOptionsInput {
-	colorMap: ColorMap;
+	colorMap: Partial<ColorMap>;
 	colors: boolean;
 	forceColors: boolean;
 }
 
 export interface TextTransformerOptions {
-	colors: Partial<TextTransformerOptionsInput['colors']>;
-	forceColors: TextTransformerOptionsInput['forceColors'];
+	colors: boolean;
+	forceColors: boolean;
 }
 
 export class TextTransformer implements Transformer {
@@ -212,10 +212,12 @@ export class TextTransformer implements Transformer {
 	/**
 	 * Set new colors.
 	 */
-	public setColors(colorMap: ColorMap) {
+	public setColors(colorMap: Partial<ColorMap>) {
 		for (const level of Array.from(Object.keys(colorMap)) as (keyof ColorMap)[]) {
 			const color = colorMap[level];
-			this.setColor(level, color);
+			if (color != null) {
+				this.setColor(level, color);
+			}
 		}
 	}
 }
