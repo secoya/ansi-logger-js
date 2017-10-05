@@ -20,7 +20,7 @@
 	"devDependencies": {
 		"@types/jest": "21.1.1",
 		"jest": "21.2.1",
-		"prettier": "1.7.3",
+		"prettier": "1.7.4",
 		"ts-jest": "21.0.1",
 		"tslint": "5.7.0",
 		"tslint-secoya": "1.0.6",
