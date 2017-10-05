@@ -128,13 +128,13 @@ describe('Logger', () => {
 
 		outputToAllLevels(logger);
 
-		expect(err.mock.calls[0][0].toString()).toEqual('[0000-00-00 00:00:00] [ERROR]   error');
-		expect(out.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [WARN]    warn']);
-		expect(out.mock.calls[1]).toEqual(['[0000-00-00 00:00:00] [SUCCESS] success']);
-		expect(out.mock.calls[2]).toEqual(['[0000-00-00 00:00:00] [LOG]     log']);
-		expect(out.mock.calls[3]).toEqual(['[0000-00-00 00:00:00] [INFO]    info']);
-		expect(out.mock.calls[4]).toEqual(['[0000-00-00 00:00:00] [DEBUG]   debug']);
-		expect(out.mock.calls[5]).toEqual(['[0000-00-00 00:00:00] [VERBOSE] verbose']);
+		expect(err.mock.calls[0][0].toString()).toEqual('[0000-00-00 00:00:00] [ERROR]   error\n');
+		expect(out.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [WARN]    warn\n']);
+		expect(out.mock.calls[1]).toEqual(['[0000-00-00 00:00:00] [SUCCESS] success\n']);
+		expect(out.mock.calls[2]).toEqual(['[0000-00-00 00:00:00] [LOG]     log\n']);
+		expect(out.mock.calls[3]).toEqual(['[0000-00-00 00:00:00] [INFO]    info\n']);
+		expect(out.mock.calls[4]).toEqual(['[0000-00-00 00:00:00] [DEBUG]   debug\n']);
+		expect(out.mock.calls[5]).toEqual(['[0000-00-00 00:00:00] [VERBOSE] verbose\n']);
 	});
 
 	test('multiline output get meta prefix prepended on each line', () => {
@@ -189,9 +189,9 @@ describe('Logger', () => {
 		expect(err).toHaveBeenCalledTimes(1);
 		expect(out).toHaveBeenCalledTimes(2);
 
-		expect(err.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [ERROR]   error']);
-		expect(out.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [INFO]    info']);
-		expect(out.mock.calls[1]).toEqual(['[0000-00-00 00:00:00] [VERBOSE] verbose']);
+		expect(err.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [ERROR]   error\n']);
+		expect(out.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [INFO]    info\n']);
+		expect(out.mock.calls[1]).toEqual(['[0000-00-00 00:00:00] [VERBOSE] verbose\n']);
 	});
 
 	test('simple json output', () => {

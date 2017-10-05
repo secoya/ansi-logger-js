@@ -204,7 +204,9 @@ export class TextTransformer implements Transformer {
 			}
 		}
 
-		return this.handleMultiline(prefix + ' ', String(entry.message), this.resolveLevelColor(entry.levelNumeric));
+		return (
+			this.handleMultiline(prefix + ' ', String(entry.message), this.resolveLevelColor(entry.levelNumeric)) + '\n'
+		);
 	}
 
 	/**

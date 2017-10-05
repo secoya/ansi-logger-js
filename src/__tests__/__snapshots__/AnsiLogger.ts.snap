@@ -5,7 +5,8 @@ Array [
   "[0000-00-00 00:00:00] [ERROR]   This is the error message
 [0000-00-00 00:00:00] [ERROR]   MockError: This is the error message
 [0000-00-00 00:00:00] [ERROR]       at Object.test (ansi-logger-js/src/__tests__/logger.ts:0:0)
-[0000-00-00 00:00:00] [ERROR]       at .... Mocked jest call stack",
+[0000-00-00 00:00:00] [ERROR]       at .... Mocked jest call stack
+",
 ]
 `;
 
@@ -20,7 +21,8 @@ Array [
   "[0000-00-00 00:00:00] [INFO]    
 [0000-00-00 00:00:00] [INFO]                multiline
 [0000-00-00 00:00:00] [INFO]                text is outputted
-[0000-00-00 00:00:00] [INFO]                correctly",
+[0000-00-00 00:00:00] [INFO]                correctly
+",
 ]
 `;
 
@@ -31,12 +33,14 @@ Array [
 [0000-00-00 00:00:00] [text] [DEBUG]     name: 'test'
 [0000-00-00 00:00:00] [text] [DEBUG]     pass: 'test'
 [0000-00-00 00:00:00] [text] [DEBUG]     user: 'test'
-[0000-00-00 00:00:00] [text] [DEBUG]   }",
+[0000-00-00 00:00:00] [text] [DEBUG]   }
+",
 ]
 `;
 
 exports[`Logger when logger has a group it is outputted in meta prefix 1`] = `
 Array [
-  "[0000-00-00 00:00:00] [GROUP] [INFO]    info text",
+  "[0000-00-00 00:00:00] [GROUP] [INFO]    info text
+",
 ]
 `;
