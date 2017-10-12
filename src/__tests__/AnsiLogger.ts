@@ -206,25 +206,25 @@ describe('Logger', () => {
 		outputToAllLevels(logger);
 
 		expect(err.mock.calls[0]).toEqual([
-			'{"group":"json","levelNumeric":1,"levelText":"ERROR","message":"error","timestamp":"0000-00-00 00:00:00"}',
+			'{"group":"json","levelNumeric":1,"levelText":"ERROR","message":"error","timestamp":"0000-00-00 00:00:00"}\n',
 		]);
 		expect(out.mock.calls[0]).toEqual([
-			'{"group":"json","levelNumeric":2,"levelText":"WARN","message":"warn","timestamp":"0000-00-00 00:00:00"}',
+			'{"group":"json","levelNumeric":2,"levelText":"WARN","message":"warn","timestamp":"0000-00-00 00:00:00"}\n',
 		]);
 		expect(out.mock.calls[1]).toEqual([
-			'{"group":"json","levelNumeric":4,"levelText":"SUCCESS","message":"success","timestamp":"0000-00-00 00:00:00"}',
+			'{"group":"json","levelNumeric":4,"levelText":"SUCCESS","message":"success","timestamp":"0000-00-00 00:00:00"}\n',
 		]);
 		expect(out.mock.calls[2]).toEqual([
-			'{"group":"json","levelNumeric":8,"levelText":"LOG","message":"log","timestamp":"0000-00-00 00:00:00"}',
+			'{"group":"json","levelNumeric":8,"levelText":"LOG","message":"log","timestamp":"0000-00-00 00:00:00"}\n',
 		]);
 		expect(out.mock.calls[3]).toEqual([
-			'{"group":"json","levelNumeric":16,"levelText":"INFO","message":"info","timestamp":"0000-00-00 00:00:00"}',
+			'{"group":"json","levelNumeric":16,"levelText":"INFO","message":"info","timestamp":"0000-00-00 00:00:00"}\n',
 		]);
 		expect(out.mock.calls[4]).toEqual([
-			'{"group":"json","levelNumeric":32,"levelText":"DEBUG","message":"debug","timestamp":"0000-00-00 00:00:00"}',
+			'{"group":"json","levelNumeric":32,"levelText":"DEBUG","message":"debug","timestamp":"0000-00-00 00:00:00"}\n',
 		]);
 		expect(out.mock.calls[5]).toEqual([
-			'{"group":"json","levelNumeric":64,"levelText":"VERBOSE","message":"verbose","timestamp":"0000-00-00 00:00:00"}',
+			'{"group":"json","levelNumeric":64,"levelText":"VERBOSE","message":"verbose","timestamp":"0000-00-00 00:00:00"}\n',
 		]);
 	});
 

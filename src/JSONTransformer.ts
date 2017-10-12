@@ -5,6 +5,6 @@ import { LogEntry, Transformer } from './AnsiLogger';
  */
 export class JSONTransformer implements Transformer {
 	public format(entry: LogEntry) {
-		return JSON.stringify(entry);
+		return JSON.stringify(entry) + '\n';
 	}
 }
