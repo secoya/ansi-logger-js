@@ -13,15 +13,15 @@
 	],
 	"dependencies": {
 		"cli-color": "1.2.0",
-		"moment": "2.18.1",
-		"tslib": "1.7.1"
+		"moment": "2.19.1",
+		"tslib": "1.8.0"
 	},
 	"description": "Console logger with support for colors and log levels, it complies to the default console.log interface, with methods like log,error,warn,debug and extended with some extra levels for nice formatting purposes.",
 	"devDependencies": {
-		"@types/jest": "21.1.1",
+		"@types/jest": "21.1.2",
 		"jest": "21.2.1",
 		"prettier": "1.7.4",
-		"ts-jest": "21.0.1",
+		"ts-jest": "21.1.2",
 		"tslint": "5.7.0",
 		"tslint-secoya": "1.0.6",
 		"typescript": "2.5.3"
@@ -40,7 +40,7 @@
 	"name": "ansi-logger",
 	"optionalDependencies": {
 		"@types/cli-color": "^0.3.29",
-		"@types/node": "^8.0.31"
+		"@types/node": "^8.0.34"
 	},
 	"repository": "https://github.com/secoya/ansi-logger-js",
 	"scripts": {
