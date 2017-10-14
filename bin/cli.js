@@ -26,6 +26,11 @@ if (process.argv[2] === '-f') {
 	input = process.stdin;
 }
 
+let splitPipes = false;
+if (process.argv.indexOf('-s') >= -1 || process.argv.indexOf('--split-pipes') >= -1) {
+	splitPipes = true;
+}
+
 const rl = readline.createInterface({
 	input: input,
 	output: process.stdout,
@@ -40,7 +45,7 @@ rl.on('line', line => {
 	try {
 		const entry = JSON.parse(line);
 		const formattedEntry = transformer.format(entry);
-		if (entry.levelNumeric === 1) {
+		if (splitPipes && entry.levelNumeric === 1) {
 			process.stderr.write(formattedEntry);
 		} else {
 			process.stdout.write(formattedEntry);
