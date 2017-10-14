@@ -2,7 +2,7 @@ import * as clc from 'cli-color';
 import { matchMask, resolveLogLevel, LogEntry, Mask, Transformer } from './AnsiLogger';
 
 export type ColorType = 'ERROR' | 'WARN' | 'SUCCESS' | 'LOG' | 'INFO' | 'DEBUG' | 'VERBOSE' | 'GROUP' | 'TIME';
-export type ColorMap = { [P in ColorType]: clc.Format };
+export type ColorMap = {[P in ColorType]: clc.Format };
 
 export interface TextTransformerOptionsInput {
 	colorMap: Partial<ColorMap>;
@@ -15,9 +15,13 @@ export interface TextTransformerOptions {
 	forceColors: boolean;
 }
 
-export class TextTransformer implements Transformer {
-	public get options(): Partial<TextTransformerOptions> {
+export class TextTransformer<E extends string = string> implements Transformer<E> {
+	public get options(): TextTransformerOptions {
 		return this._options;
+	}
+
+	public get useColors(): boolean {
+		return this._options.forceColors || (!!process.stdout.isTTY && this.options.colors);
 	}
 
 	// tslint:disable-next-line:variable-name
@@ -51,6 +55,71 @@ export class TextTransformer implements Transformer {
 		if (options != null) {
 			this.setOptions(options);
 		}
+	}
+
+	private _formatTypes(inputType: any, depth: number = 3, indent: number = 0): string {
+		// making the proper indentation
+		let val;
+
+		const pad = ' '.repeat(indent > 0 ? indent - 1 : 0);
+
+		// primitive types
+		if (typeof inputType === 'number' || typeof inputType === 'boolean' || inputType == null) {
+			return `${pad}${inputType}` as E;
+		}
+
+		if (typeof inputType === 'string') {
+			return `${pad}'${inputType}'` as E;
+		}
+
+		// array is formatted as one-liners
+		if (Array.isArray(inputType) && indent < depth) {
+			let str = `${pad}[`;
+			// tslint:disable-next-line:forin
+			for (const key of Array.from(inputType.keys())) {
+				val = inputType[key];
+				str += ` ${this._formatTypes(val, indent + 1, depth).trim()}`;
+				str += ((key as any) as number) < inputType.length - 1 ? ',' : ' ';
+			}
+			return `${str}]` as E;
+		}
+
+		// hashes is formatted with indentation for every level
+		// of the object, the values of the properties are also resolved.
+		if (typeof inputType === 'object') {
+			const cname = inputType.constructor.name;
+			if (cname === 'Error' || inputType instanceof Error) {
+				let str = `${pad}${inputType.message}`;
+				if (inputType.stack != null) {
+					str += `\n${pad}${inputType.stack}`;
+				}
+				return str as E;
+			} else if (cname === 'Object' && indent < depth) {
+				let str = `${pad}{`;
+				for (const key of Array.from(Object.keys(inputType))) {
+					val = inputType[key];
+					str += `\n${pad}  ${key}: ${this._formatTypes(val, indent + 1, depth).trim()}`;
+				}
+				if (str.length > pad.length + 1) {
+					str += `\n${pad}`;
+				}
+				return `${str}}` as E;
+			}
+		}
+
+		// print the name of a complex type.
+		const isFunc = typeof inputType === 'function';
+		if (isFunc) {
+			const cname = inputType.constructor.name;
+			if (isFunc && cname !== 'Function') {
+				return `${pad}[Function: ${cname}]` as E;
+			}
+			return `${pad}${cname}` as E;
+		}
+
+		// print the name of an unhandled type.
+		// typically this will return 'object'
+		return `${pad}${typeof inputType}` as E;
 	}
 
 	/**
@@ -97,6 +166,9 @@ export class TextTransformer implements Transformer {
 		return `[${this.colorize(time, this.colors.TIME)}]`;
 	}
 
+	/**
+	 * Prefix eact line of msg with prefix.
+	 */
 	private handleMultiline(prefix: string, msg: string, color?: clc.Format | null): string {
 		const res = [];
 		for (const m of Array.from(msg.split('\n'))) {
@@ -166,28 +238,22 @@ export class TextTransformer implements Transformer {
 		}
 	}
 
-	private setOptions(options: Partial<TextTransformerOptionsInput>) {
-		if (options.colorMap != null) {
-			this.setColors(options.colorMap);
-		}
-
-		const optionKeys = Array.from(Object.keys(this.options)) as (keyof TextTransformerOptions)[];
-		for (const key of optionKeys) {
-			const val = options[key];
-			if (val != null) {
-				this._options[key] = val;
+	/**
+	 * Set new colors.
+	 */
+	private setColors(colorMap: Partial<ColorMap>) {
+		for (const level of Array.from(Object.keys(colorMap)) as (keyof ColorMap)[]) {
+			const color = colorMap[level];
+			if (color != null) {
+				this.setColor(level, color);
 			}
 		}
-	}
-
-	public get useColors(): boolean {
-		return this._options.forceColors || (!!process.stdout.isTTY && this._options.colors);
 	}
 
 	/**
 	 * Transform log entry to text output.
 	 */
-	public format(entry: LogEntry): string {
+	public format(entry: LogEntry): E {
 		// get the formatted current time.
 		let prefix = this.formatTime(entry.timestamp);
 
@@ -206,17 +272,23 @@ export class TextTransformer implements Transformer {
 
 		return (
 			this.handleMultiline(prefix + ' ', String(entry.message), this.resolveLevelColor(entry.levelNumeric)) + '\n'
-		);
+		) as any as E;
 	}
 
-	/**
-	 * Set new colors.
-	 */
-	public setColors(colorMap: Partial<ColorMap>) {
-		for (const level of Array.from(Object.keys(colorMap)) as (keyof ColorMap)[]) {
-			const color = colorMap[level];
-			if (color != null) {
-				this.setColor(level, color);
+	public formatTypes(inputType: any): E {
+		return this._formatTypes(inputType) as E;
+	}
+
+	public setOptions(options: Partial<TextTransformerOptionsInput>) {
+		if (options.colorMap != null) {
+			this.setColors(options.colorMap);
+		}
+
+		const optionKeys = Array.from(Object.keys(this.options)) as (keyof TextTransformerOptions)[];
+		for (const key of optionKeys) {
+			const val = options[key];
+			if (val != null) {
+				this._options[key] = val;
 			}
 		}
 	}

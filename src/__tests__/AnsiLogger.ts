@@ -19,7 +19,7 @@ class MockError extends Error {
 	}
 }
 
-const outputToAllLevels = (logger: AnsiLogger) => {
+const outputToAllLevels = <E>(logger: AnsiLogger<E>) => {
 	logger.error('error');
 	logger.warn('warn');
 	logger.success('success');
@@ -197,8 +197,7 @@ describe('Logger', () => {
 	test('simple json output', () => {
 		const err = jest.fn();
 		const out = jest.fn();
-		const logger = getSimpleLogger(Level.VERBOSE, err, out);
-		logger.setOptions({
+		const logger = getSimpleLogger(Level.VERBOSE, err, out).setOptions({
 			group: 'json',
 			transformer: new JSONTransformer(),
 		});
@@ -231,8 +230,7 @@ describe('Logger', () => {
 	test('json complex types output', () => {
 		const err = jest.fn();
 		const out = jest.fn();
-		const logger = getSimpleLogger(Level.VERBOSE, err, out);
-		logger.setOptions({ group: 'json', transformer: new JSONTransformer() });
+		const logger = getSimpleLogger(Level.VERBOSE, err, out).setOptions({ group: 'json', transformer: new JSONTransformer() });
 
 		logger.debug({ host: 'localhost', name: 'test', pass: 'test', user: 'test' });
 
@@ -243,8 +241,7 @@ describe('Logger', () => {
 		const err = jest.fn();
 		const out = jest.fn();
 
-		const logger = getSimpleLogger(Level.VERBOSE, err, out);
-		logger.setOptions({ group: 'text' });
+		const logger = getSimpleLogger(Level.VERBOSE, err, out).setOptions({ group: 'text' });
 
 		logger.debug({ host: 'localhost', name: 'test', pass: 'test', user: 'test' });
 

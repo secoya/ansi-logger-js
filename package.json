@@ -44,11 +44,12 @@
 	},
 	"repository": "https://github.com/secoya/ansi-logger-js",
 	"scripts": {
-		"build": "npm run clean && tsc -p tsconfig.build.json",
+		"build": "tsc -p tsconfig.build.json",
 		"clean": "rm -Rf lib/ types/",
 		"fmt": "prettier --write -l 'src/**/*.ts'",
 		"lint": "tslint src/",
 		"test": "jest --config jest.config.json",
+		"prebuild": "npm run clean",
 		"prepublishOnly": "npm run clean && npm test && npm run lint && npm run build"
 	},
 	"types": "types/index.d.ts",

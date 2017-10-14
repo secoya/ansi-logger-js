@@ -1,6 +1,4 @@
 import * as moment from 'moment';
-import { IdentityTransformer } from './IdentityTransformer';
-import { JSONTransformer } from './JSONTransformer';
 import { TextTransformer } from './TextTransformer';
 
 export interface LogEntry {
@@ -11,11 +9,17 @@ export interface LogEntry {
 	timestamp: string;
 }
 
-export interface Transformer {
-	format(entry: LogEntry): any;
+/**
+ * Transforms
+ */
+export interface Transformer<TOutput> {
+	format(entry: LogEntry): TOutput;
+	formatTypes(msg: any): TOutput;
 }
 
-// tslint:disable:no-bitwise
+/**
+ * Contains each log level mask.
+ */
 export enum Mask {
 	ERROR = 0b0000001,
 	WARN = 0b0000010,
@@ -26,35 +30,44 @@ export enum Mask {
 	VERBOSE = 0b1000000,
 }
 
+/**
+ * Contains each pre compiled log levels.
+ */
 export enum Level {
 	SILENT = 0b0000000,
-	ERROR = SILENT | Mask.ERROR,
-	WARN = ERROR | Mask.WARN,
-	SUCCESS = WARN | Mask.SUCCESS,
-	LOG = SUCCESS | Mask.LOG,
-	INFO = LOG | Mask.INFO,
-	DEBUG = INFO | Mask.DEBUG,
-	VERBOSE = DEBUG | Mask.VERBOSE,
+	ERROR = 0b0000001,
+	WARN = 0b0000011,
+	SUCCESS = 0b0000111,
+	LOG = 0b0001111,
+	INFO = 0b0011111,
+	DEBUG = 0b0111111,
+	VERBOSE = 0b1111111,
 }
-// tslint:enable:no-bitwise
 
-export interface LoggerOptionsInput {
+export interface LoggerOptionsInput<TOutput> {
 	group: string;
 	logLevel: number;
 	outputters: {
-		err: (msg: any) => void;
-		out: (msg: any) => void;
+		err: (msg: TOutput) => void,
+		out: (msg: TOutput) => void,
 	};
+	/**
+	 * Moment.js formats.
+	 * @link http://momentjs.com
+	 */
 	timeformat: string;
-	transformer: Transformer;
+	transformer: Transformer<TOutput>;
 }
 
-export interface LoggerOptions {
-	group?: LoggerOptionsInput['group'];
-	logLevel: LoggerOptionsInput['logLevel'];
-	outputters: LoggerOptionsInput['outputters'];
-	timeformat: LoggerOptionsInput['timeformat'];
-	transformer: LoggerOptionsInput['transformer'];
+export interface LoggerOptions<TOutput> {
+	group?: string;
+	logLevel: number;
+	outputters: {
+		err: (msg: TOutput) => void;
+		out: (msg: TOutput) => void;
+	};
+	timeformat: string;
+	transformer: Transformer<TOutput>;
 }
 
 export type LogMask = keyof typeof Mask;
@@ -95,15 +108,17 @@ export function resolveLogLevel(mask: Mask): string {
  * This controls what should be ouputted to the console,
  * everything is categorized into log levels, so when you set a log level
  * you output from all the selected levels.
- * It is possible to disables colors (some teminals don't support colors).
+ * It is possible to disables colors (some terminals don't support colors).
  * you can also specify that you are only interested in output for a specific
  * logLevel, then everything else is not outputted.
  * It is also possible to make the logger silent.
  */
-export class AnsiLogger {
-	// tslint:enable:react-aware-member-ordering
+export class AnsiLogger<TOutput> {
 
-	public get options(): Partial<LoggerOptions> {
+	/**
+	 * The options with defaults overriden by user input.
+	 */
+	public get options(): LoggerOptions<TOutput> {
 		return this._options;
 	}
 
@@ -113,87 +128,77 @@ export class AnsiLogger {
 	 * it can be changed by using the setOptions method.
 	 */
 	// tslint:disable-next-line:variable-name react-aware-member-ordering
-	private _options: LoggerOptions;
+	private _options: LoggerOptions<TOutput>;
 
 	/**
-	 * Constructs a Logger, and sets default option values.
+	 * Constructs a Logger, and patch default values with the `options` passed.
 	 */
-	public constructor(options?: Partial<LoggerOptionsInput>) {
-		// tslint:disable:object-literal-key-quotes
+	public constructor(options?: Partial<LoggerOptionsInput<TOutput>>) {
+		const opts = options == null ? {} : options;
 		this._options = {
-			group: undefined,
-			logLevel: Level.INFO,
-			outputters: {
-				out(msg: any): void {
-					// Setting up default group // the log level // disbles colors if true
-					process.stdout.write(msg);
+			group: opts.group,
+			logLevel: opts.logLevel == null ? Level.INFO : opts.logLevel,
+			outputters: opts.outputters || {
+				err: (msg) => {
+					process.stderr.write(msg as any);
 				},
-				err(msg: any): void {
-					process.stderr.write(msg);
+				out: (msg) => {
+					process.stdout.write(msg as any);
 				},
 			},
-			/**
-			 * Moment.js formats.
-			 * @link http://momentjs.com
-			 */
-			timeformat: 'YYYY-MM-DD HH:mm:ss.SSSZZ',
-			transformer: new TextTransformer(),
+			timeformat: opts.timeformat || 'YYYY-MM-DD HH:mm:ss.SSSZZ',
+			transformer: opts.transformer || new TextTransformer() as any as Transformer<TOutput>,
 		};
-		// tslint:enable:object-literal-key-quotes
-
-		if (options != null) {
-			this.setOptions(options);
-		}
 	}
 
 	/**
-	 * Print to console.
-	 * NB! This will print to the console based on the log level you have enabled.
+	 * Print to outputters.
+	 * NB! This will print to the outputter based on what log levels you have enabled.
 	 */
-	private print(msg: string, logMask?: number | null): void {
+	private print(msg: string, outputMask?: number | null): void {
 		// return if the logLevel is higher than the selected the logLevel.
-		if (logMask == null) {
-			logMask = Mask.LOG;
+		if (outputMask == null) {
+			outputMask = Mask.LOG;
 		}
 
-		if (!matchMask(this._options.logLevel, logMask)) {
+		if (!matchMask(this._options.logLevel, outputMask)) {
 			return;
 		}
 
 		const entry: LogEntry = {
 			group: this.options.group,
-			levelNumeric: logMask,
-			levelText: resolveLogLevel(logMask),
+			levelNumeric: outputMask,
+			levelText: resolveLogLevel(outputMask),
 			message: msg,
 			timestamp: moment().format(this.options.timeformat),
 		};
 
 		// finally printing the output!.
-		if (matchMask(logMask, Mask.ERROR)) {
-			this._options.outputters.err.call(this, this._options.transformer.format(entry));
+		if (matchMask(outputMask, Mask.ERROR)) {
+			this.options.outputters.err.call(this, this.options.transformer.format(entry));
 		} else {
-			this._options.outputters.out.call(this, this._options.transformer.format(entry));
+			this.options.outputters.out.call(this, this.options.transformer.format(entry));
 		}
 	}
 
 	/**
-	 * Print a debug formatted message.
+	 * Print message(s) to debug log level if enabled.
 	 */
-	public debug<T>(firstArg: T, ...__: any[]): T {
+	public debug<L>(firstArg: L, ...__: any[]): L {
 		for (const msg of Array.from(arguments)) {
 			if (typeof msg === 'string') {
 				this.print(msg, Mask.DEBUG);
 			} else {
-				this.print(this.formatTypes(msg), Mask.DEBUG);
+				this.print(this.formatTypes(msg) as any, Mask.DEBUG);
 			}
 		}
 		return firstArg;
 	}
 
 	/**
-	 * Print an error.
+	 * Print message(s) to error log level if enabled.
 	 */
-	public error<T>(firstArg: T, ...__: any[]): T {
+	public error<L>(firstArg: L, ...__: any[]): L {
 		for (const msg of Array.from(arguments)) {
 			if (msg instanceof Error || (typeof msg === 'object' && 'stack' in msg)) {
 				this.formatError(msg);
@@ -205,16 +210,19 @@ export class AnsiLogger {
 	}
 
 	/**
-	 * Format an error, this is typically used, for string formatting an Exception/Error.
+	 * Format an error.
+	 *
+	 * This is typically used, for text transforming an Exception(s)/Error(s).
 	 */
 	public formatError(err: any): void {
-		this.print(this.formatTypes(err), Mask.ERROR);
+		this.print(this.formatTypes(err) as any, Mask.ERROR);
 	}
 
 	/**
 	 * Format a function call, for the debug level
-	 * NB! if passing arguments the function
-	 *     every argument, gonna be formatted with the formatTypes() function
+	 *
+	 * **NB!** if passing `arguments` to the function
+	 *         every argument will be formatted with `formatTypes()`
 	 */
 	public formatFunctionCall(functionName: string, args?: any[]) {
 		if (args == null) {
@@ -228,110 +236,35 @@ export class AnsiLogger {
 	}
 
 	/**
-	 * Format types to string, some types make resively calls.
+	 * Text transform Format types to string, some types make resively calls.
 	 */
-	// tslint:disable-next-line:no-reserved-keywords
-	public formatTypes(type: any, depth?: number, indent?: number) {
-		if (
-			this.options.transformer instanceof JSONTransformer ||
-			this.options.transformer instanceof IdentityTransformer
-		) {
-			return type;
-		}
-
-		// making the proper indentation
-		let val;
-		if (indent == null) {
-			indent = 0;
-		}
-		if (depth == null) {
-			depth = 3;
-		}
-
-		const pad = ' '.repeat(indent > 0 ? indent - 1 : 0);
-
-		// primitive types
-		if (typeof type === 'number' || typeof type === 'boolean' || type == null) {
-			return `${pad}${type}`;
-		}
-
-		if (typeof type === 'string') {
-			return `${pad}'${type}'`;
-		}
-
-		// array is formatted as one-liners
-		if (Array.isArray(type) && indent < depth) {
-			let str = `${pad}[`;
-			// tslint:disable-next-line:forin
-			for (const key of Array.from(type.keys())) {
-				val = type[key];
-				str += ` ${this.formatTypes(val, indent + 1, depth).trim()}`;
-				str += ((key as any) as number) < type.length - 1 ? ',' : ' ';
-			}
-			return `${str}]`;
-		}
-
-		// hashes is formatted with indentation for every level
-		// of the object, the values of the properties are also resolved.
-		if (typeof type === 'object') {
-			const cname = type.constructor.name;
-			if (cname === 'Error' || type instanceof Error) {
-				let str = `${pad}${type.message}`;
-				if (type.stack != null) {
-					str += `\n${pad}${type.stack}`;
-				}
-				return str;
-			} else if (cname === 'Object' && indent < depth) {
-				let str = `${pad}{`;
-				for (const key of Array.from(Object.keys(type))) {
-					val = type[key];
-					str += `\n${pad}  ${key}: ${this.formatTypes(val, indent + 1, depth).trim()}`;
-				}
-				if (str.length > pad.length + 1) {
-					str += `\n${pad}`;
-				}
-				return `${str}}`;
-			}
-		}
-
-		// print the name of a complex type.
-		const isFunc = typeof type === 'function';
-		if (isFunc) {
-			const cname = type.constructor.name;
-			if (isFunc && cname !== 'Function') {
-				return `${pad}[Function: ${cname}]`;
-			}
-			return `${pad}${cname}`;
-		}
-
-		// print the name of an unhandled type.
-		// typically this will return 'object'
-		return `${pad}${typeof type}`;
+	public formatTypes(inputType: any): TOutput {
+		return this.options.transformer.formatTypes(inputType);
 	}
 
 	/**
-	 * Print an info formatted message.
+	 * Print messeage(s) to info log level if enabled.
 	 */
-	public info<T>(firstArg: T, ...__: any[]): T {
+	public info<L>(firstArg: L, ...__: any[]): L {
 		for (const msg of Array.from(arguments)) {
 			if (typeof msg === 'string') {
 				this.print(msg, Mask.INFO);
 			} else {
-				this.print(this.formatTypes(msg), Mask.INFO);
+				this.print(this.formatTypes(msg) as any, Mask.INFO);
 			}
 		}
 		return firstArg;
 	}
 
 	/**
-	 * Print an default log formatted message.
+	 * Print message(s) to default log level if enabled..
 	 */
-	public log<T>(firstArg: T, ...__: any[]): T {
+	public log<L>(firstArg: L, ...__: any[]): L {
 		for (const msg of Array.from(arguments)) {
 			if (typeof msg === 'string') {
 				this.print(msg, Mask.LOG);
 			} else {
-				this.print(this.formatTypes(msg), Mask.LOG);
+				this.print(this.formatTypes(msg) as any, Mask.LOG);
 			}
 		}
 		return firstArg;
@@ -340,7 +273,9 @@ export class AnsiLogger {
 	/**
 	 * Sets the options.
 	 */
-	public setOptions(options: Partial<LoggerOptionsInput>) {
+	public setOptions<LOutput = TOutput>(
+		options: Partial<LoggerOptionsInput<LOutput>>,
+	): AnsiLogger<LOutput> {
 		const currentLoglevel = this._options.logLevel;
 		const optionKeys = Array.from(Object.keys(this.options));
 		for (const key of optionKeys) {
@@ -354,12 +289,14 @@ export class AnsiLogger {
 			this._options.logLevel = currentLoglevel;
 			this.warn(`Invalid log level is trying to be set: ${options.logLevel}, aborting...`);
 		}
+
+		return this as any as AnsiLogger<LOutput>;
 	}
 
 	/**
 	 * Print a success formatted message.
 	 */
-	public success<T>(firstArg: T, ...__: any[]): T {
+	public success<L>(firstArg: L, ...__: any[]): L {
 		for (const msg of Array.from(arguments)) {
 			this.print(msg, Mask.SUCCESS);
 		}
@@ -369,7 +306,7 @@ export class AnsiLogger {
 	/**
 	 * Print a verbose formatted message.
 	 */
-	public verbose<T>(firstArg: T, ...__: any[]): T {
+	public verbose<L>(firstArg: L, ...__: any[]): L {
 		for (const msg of Array.from(arguments)) {
 			this.print(msg, Mask.VERBOSE);
 		}
@@ -379,7 +316,7 @@ export class AnsiLogger {
 	/**
 	 * Print a warning.
 	 */
-	public warn<T>(firstArg: T, ...__: any[]): T {
+	public warn<L>(firstArg: L, ...__: any[]): L {
 		for (const msg of Array.from(arguments)) {
 			this.print(msg, Mask.WARN);
 		}
