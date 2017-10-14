@@ -42,10 +42,8 @@ rl.on('line', line => {
 		const formattedEntry = transformer.format(entry);
 		if (entry.levelNumeric === 1) {
 			process.stderr.write(formattedEntry);
-			process.stderr.write('\n');
 		} else {
 			process.stdout.write(formattedEntry);
-			process.stdout.write('\n');
 		}
 	} catch (e) {
 		process.stderr.write(e.stack);
