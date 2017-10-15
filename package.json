@@ -53,5 +53,5 @@
 		"prepublishOnly": "npm run clean && npm test && npm run lint && npm run build"
 	},
 	"types": "types/index.d.ts",
-	"version": "2.0.7"
+	"version": "2.0.8"
 }
