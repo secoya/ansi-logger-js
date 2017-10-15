@@ -2,84 +2,84 @@
 
 Console logger with support for colors and log levels, it complies to the default console.log interface, with methods like log,error,warn and debug but is extended with some extra levels for nice formatting purposes.
 
-## API - `AnsiLogger`
+## API - `AnsiLogger<E>`
 
-### `AnsiLogger(options: Partial<Options>)`
+### [AnsiLogger\<E\>(options: Partial<Options>)](#ansi-logger-constructor)
 Set options changes the internal setting of the logger
 and the behavior will change after this call.
 if you change the log levels to output the new mask of log levels is outputted to
 the `INFO` level, so if `INFO` level isn't in the new log level mask, nothing will be outputted.
 
-### `AnsiLogger.setOptions(options: Partial<Options>): void`
+### `AnsiLogger.`[setOptions](#ansi-logger-set-options)`(options: Partial<Options>): void`
 See constructor description
 
-### `AnsiLogger.error(msg1 [, msg2,..]): msg1`
+### `AnsiLogger.`[error](#ansi-logger-error)`(msg1 [, msg2,..]): msg1`
 Log to the error level, iff the `ERROR` mask is present in the log level mask of the logger
 the message(s) will be outputted and formatted as an error.
 
-### `AnsiLogger.warn(msg1 [, msg2,..]): msg1`
+### `AnsiLogger.`[warn](#ansi-logger-warn)`(msg1 [, msg2,..]): msg1`
 Log to the warn level, iff the `WARN` mask is present in the log level mask of the logger
 the message(s) will be outputted and formatted as an error.
 
-### `AnsiLogger.success(msg1 [, msg2,..]): msg1`
+### `AnsiLogger.`[success](#ansi-logger-success)`(msg1 [, msg2,..]): msg1`
 Log to the success level, iff the `SUCCESS` mask is present in the log level mask of the logger
 the message(s) will be outputted and formatted as an error.
 
-### `AnsiLogger.log(msg1 [, msg2,..]): msg1`
+### `AnsiLogger.`[log](#ansi-logger-log)`(msg1 [, msg2,..]): msg1`
 Log to the log level, iff the `LOG` mask is present in the log level mask of the logger
 the message(s) will be outputted and formatted as an error.
 
-### `AnsiLogger.info(msg1 [, msg2,..]): msg1`
+### `AnsiLogger.`[info](#ansi-logger-info)`(msg1 [, msg2,..]): msg1`
 Log to the info level, iff the `INFO` mask is present in the log level mask of the logger
 the message(s) will be outputted and formatted as an error.
 
-### `AnsiLogger.debug(msg1 [, msg2,..]): msg1`
+### `AnsiLogger.`[debug](#ansi-logger-debug)`(msg1 [, msg2,..]): msg1`
 Log to the debug level, iff the `DEBUG` mask is present in the log level mask of the logger
 the message(s) will be outputted and formatted as an error.
 
-### `AnsiLogger.verbose(msg1 [, msg2,..]): msg1`
+### `AnsiLogger.`[verbose](#ansi-logger-verbose)`(msg1 [, msg2,..]): msg1`
 Log to the verbose level, iff the `VERBOSE` mask is present in the log level mask of the logger
 the message(s) will be outputted and formatted as an error.
 
-### `AnsiLogger.print(msg, [loglevel, color, style]): void`
+### `AnsiLogger.`[print](#ansi-logger-print)`(msg, [loglevel, color, style]): void`
 Output to stdout or stderr if the loglevel is `ERROR`
 
-### `AnsiLogger.formatTypes(msg, [padding = 0, depth = 3]): String`
+### `AnsiLogger.`[formatTypes](#ansi-logger-format-types)`(msg, [padding = 0, depth = 3]): E`
 Recursively format msg. It is nice to format Object and arrays with.
 You can set depth in order to avoid infinite recursion.
 
-### `AnsiLogger.formatError(err: Error): void`
+### `AnsiLogger.`[formatError](#ansi-logger-format-error)`(err: Error): void`
 Formats an error, you can use e.g. in a try/catch block pass the error to formatError
 and it will output it to `ERROR` log level.
 
 ## API - `TextTransformer`
 
-### `TextTransformer(options: Partial<Options>)`
+### [TextTransformer](#text-transformer-constructor)`(options: Partial<Options>)`
 A transformer, that "pretty prints" to human readable format.
 
-### `TextTransformer.format(entry: LogEntry): string`
+### `TextTransformer.`[format](#text-transformer-format)`(entry: LogEntry): string`
 Transform a `LogEntry` to to string output.
 
-### `TextTransformer.setOptions(options: Partial<Options>): void`
+### `TextTransformer.`[setOptions](#text-transformer-set-options)`(options: Partial<Options>): void`
 Setting new options on the transformer. Can be used to disable/enable colors
 or changing the colors.
 
 ## API - `JSONTransformer`
 
-### `JSONTransformer()`
+### [JSONTransformer()](#json-transformer)
 A transformer that JSON serializes `LogEntry`, this is great when using
 log services like log stash.
 
-### `JSONTransformer.format(entry: LogEntry): string`
+### `JSONTransformer`.[format(entry: LogEntry): string](#json-transformer-format)
 Transformats `LogEntry` to JSON string.
 
 ## API - `IdentityTransformer`
 
-### `IdentityTransformer()`
+### [IdentityTransformer()](#identity-transformer)
 Transformer that does nothing, it is useful when implementing custom
 outputters.
 
-### `IdentityTransformer.format(entry: LogEntry): LogEntry`
+### `IdentityTransformer.`[format](#json-transformer-format)`(entry: LogEntry): LogEntry`
 Returns the `LogEntry` as is.
 
 ## Log level system
@@ -136,29 +136,29 @@ VERBOSE
 
 Each of the levels listed above will output their own level and them above. So `LOG` will output `ERROR`,`WARN`,`INFO` and `LOG`.
 
-## `AnsiLogger.Options`
+## `AnsiLogger.`[Options](#ansi-logger-options)
 
-### `group`: default: `null`
+### [group](#ansi-logger-options-group) default: `null`
 Sets the group name added to all log entries, produceed by this instance.
 
-### `logLevel`, default: `Logger.Level.INFO`
+### [logLevel](#ansi-logger-options-log-level) default: `Logger.Level.INFO`
 Sets the log level of the logger.
 NB! if the default log level is used, no [level] indication is outputted, this will behavior will be optional in a later release.
 
-### `outputters`: default: `{err: process.stderr.write, out: process.stdout.write}`
+### [outputters](#ansi-logger-options-outputters) default: `{err: process.stderr.write, out: process.stdout.write}`
 An object containing `err` and `out` which are functions that consumes the transformed output
 and `writes` it to  the output medium, e.g. stdout and stederr. But it very well can
 output to files instead.
 
-### `timeformat`: default: `YYYY-MM-DD HH:mm:ss.SSSZZ`
+### [timeformat](#ansi-logger-options-timeformat) default: `YYYY-MM-DD HH:mm:ss.SSSZZ`
 A momemnt format string used to format the timestamp in the log entries.
 
-### `transformer`, default: `new Logger.TextTransformer()`
+### [transformer](#ansi-logger-options-transformer) default: `new Logger.TextTransformer()`
 An object that can transform [LogEntry] objects to string
 
-## `TextTransformer.Options`
+## `TextTransformer.`[Options](#text-transformer-options)
 
-### `colorMap`, default:
+### [colorMap](#text-transformer-options-color-map) default:
 ```js
 {
   ERROR: clc.bgRed.white,
@@ -173,12 +173,12 @@ An object that can transform [LogEntry] objects to string
 }
 ```
 
-### `colors`, default: `true`
+### [colors](#text-transformer-options-colors) default: `true`
 Whether colors are enabled or not. Even if colors are enabled, the output
 are not necessarily printed in colors, if the the output target is not a tty.
 This behavior can be mitigated, by using the `forceColors` option.
 
-### `forceColors`, default: `false`
+### [forceColors](#text-transformer-options-force-colors) default: `false`
 Whether or not colors always should be used.
 
 

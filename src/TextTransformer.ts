@@ -1,31 +1,86 @@
 import * as clc from 'cli-color';
 import { matchMask, resolveLogLevel, LogEntry, Mask, Transformer } from './AnsiLogger';
 
-export type ColorType = 'ERROR' | 'WARN' | 'SUCCESS' | 'LOG' | 'INFO' | 'DEBUG' | 'VERBOSE' | 'GROUP' | 'TIME';
-export type ColorMap = {[P in ColorType]: clc.Format };
+/**
+ * All the colors available to configure.
+ *
+ * - ERROR   - The color of the `error` output.
+ * - WARN    - The color of the `warn` output,
+ * - SUCCESS - The color of the `success` output.
+ * - LOG     - The color of the `default` log output.
+ * - INFO    - The color of the `info` log output.
+ * - DEBUG   - The color of the `debug` log output.
+ * - VERBOSE - The color of the `verbose` log output.
+ * - GROUP   - The color of the `group section` of the output.
+ * - TIME    - The color of the `time section` of the output.
+ */
+export type ColorType =
+	| 'ERROR'
+	| 'WARN'
+	| 'SUCCESS'
+	| 'LOG'
+	| 'INFO'
+	| 'DEBUG'
+	| 'VERBOSE'
+	| 'GROUP'
+	| 'TIME';
 
-export interface TextTransformerOptionsInput {
-	colorMap: Partial<ColorMap>;
-	colors: boolean;
-	forceColors: boolean;
-}
+/**
+ * The map from `ColorType`s to a coloring functions.
+ */
+export type ColorMap = {
+	[P in ColorType]: clc.Format;
+};
 
+/**
+ * Options interface for text transformer.
+ */
 export interface TextTransformerOptions {
+	/**
+	 * The map of which coloring functions to use when/where.
+	 */
+	colorMap: Partial<ColorMap>;
+	/**
+	 * Whether or not if colors is enabled, default: `process.stdout.isTTY`.
+	 */
 	colors: boolean;
+	/**
+	 * Always output colors, no matter if stdout is a TTY.
+	 */
 	forceColors: boolean;
 }
 
+/**
+ * Interface for the internal text transformer options.
+ */
+export interface TextTransformerOptionsInternal {
+	/**
+	 * Whether or not if colors is enabled, default: `process.stdout.isTTY`.
+	 */
+	colors: boolean;
+	/**
+	 * Always output colors, no matter if stdout is a TTY.
+	 */
+	forceColors: boolean;
+}
+
+/**
+ * Transformer from log entries to human readable colorized text.
+ */
 export class TextTransformer<E extends string = string> implements Transformer<E> {
-	public get options(): TextTransformerOptions {
+	public get options(): TextTransformerOptionsInternal {
 		return this._options;
 	}
 
+	/**
+	 * Whether or not this transformer outputs colored text.
+	 */
 	public get useColors(): boolean {
 		return this._options.forceColors || (!!process.stdout.isTTY && this.options.colors);
 	}
 
 	// tslint:disable-next-line:variable-name
-	private _options: TextTransformerOptions;
+	private _options: TextTransformerOptionsInternal;
 
 	// tslint:disable:object-literal-sort-keys
 	/**
@@ -46,7 +101,7 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 	};
 	// tslint:enable:object-literal-sort-keys
 
-	public constructor(options?: Partial<TextTransformerOptionsInput>) {
+	public constructor(options?: Partial<TextTransformerOptions>) {
 		this._options = {
 			colors: true,
 			forceColors: false,
@@ -57,7 +112,7 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 		}
 	}
 
-	private _formatTypes(inputType: any, depth: number = 3, indent: number = 0): string {
+	private _formatTypes(inputType: any, depth: number = 3, indent: number = 0): E {
 		// making the proper indentation
 		let val;
 
@@ -127,7 +182,7 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 	 * NB! If no-colors mode is on or no color is given.
 	 * then this method just return the message as it is.
 	 */
-	private colorize(msg: string, color?: clc.Format | null) {
+	private colorize(msg: string, color?: clc.Format | null): string {
 		if (color == null || !this.useColors) {
 			return msg;
 		}
@@ -137,16 +192,16 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 	/**
 	 * Format group if any.
 	 */
-	private formatGroup(group: string) {
+	private formatGroup(group: string): string {
 		const groupTrimmed = group.trim();
 		const pad = ' '.repeat(groupTrimmed.length - group.length);
 		return `[${this.colorize(groupTrimmed, this.colors.GROUP)}]${pad}`;
 	}
 
 	/**
-	 * Format the loglevel to the console
+	 * Format the log mask to the console.
 	 */
-	private formatLogLevel(loglevel: number) {
+	private formatLogLevel(loglevel: number): string {
 		// no need to ouput the log level, if the default log level is selected.
 		// then it's just a waste of space.
 		const loglevelStr = resolveLogLevel(loglevel);
@@ -162,7 +217,7 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 	/**
 	 * Format a object to string.
 	 */
-	private formatTime(time: string) {
+	private formatTime(time: string): string {
 		return `[${this.colorize(time, this.colors.TIME)}]`;
 	}
 
@@ -178,8 +233,7 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 	}
 
 	/**
-	 *
-	 * @param level
+	 * Resolve which coloring function to use for the level mask.
 	 */
 	private resolveLevelColor(level: Mask): clc.Format {
 		switch (true) {
@@ -201,9 +255,9 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 	}
 
 	/**
-	 * Setting a single color in the `ColorMap`
+	 * Setting a single color in the `ColorMap`.
 	 */
-	private setColor(level: ColorType, color: clc.Format) {
+	private setColor(level: ColorType, color: clc.Format): void {
 		switch (level) {
 			case 'ERROR':
 				this.colors.ERROR = color;
@@ -241,7 +295,7 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 	/**
 	 * Set new colors.
 	 */
-	private setColors(colorMap: Partial<ColorMap>) {
+	private setColors(colorMap: Partial<ColorMap>): void {
 		for (const level of Array.from(Object.keys(colorMap)) as (keyof ColorMap)[]) {
 			const color = colorMap[level];
 			if (color != null) {
@@ -275,16 +329,22 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 		) as any as E;
 	}
 
+	/**
+	 * Format complex types.
+	 */
 	public formatTypes(inputType: any): E {
 		return this._formatTypes(inputType) as E;
 	}
 
-	public setOptions(options: Partial<TextTransformerOptionsInput>) {
+	/**
+	 * Set new options.
+	 */
+	public setOptions(options: Partial<TextTransformerOptions>): void {
 		if (options.colorMap != null) {
 			this.setColors(options.colorMap);
 		}
 
-		const optionKeys = Array.from(Object.keys(this.options)) as (keyof TextTransformerOptions)[];
+		const optionKeys = Array.from(Object.keys(this.options)) as (keyof TextTransformerOptionsInternal)[];
 		for (const key of optionKeys) {
 			const val = options[key];
 			if (val != null) {

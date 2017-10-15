@@ -5,7 +5,6 @@ import { LogEntry, Transformer } from './AnsiLogger';
  * and just returns the `LogEntry` as is.
  */
 export class IdentityTransformer<E extends LogEntry = LogEntry> implements Transformer<E> {
-
 	/**
 	 * Format log entry according to identity rules.
 	 */
@@ -14,9 +13,9 @@ export class IdentityTransformer<E extends LogEntry = LogEntry> implements Trans
 	}
 
 	/**
-	 * Format complex types.
+	 * Return the complex type identity.
 	 */
-	public formatTypes(msg: any): E {
-		return msg as E;
+	public formatTypes<T>(msg: T): T {
+		return msg;
 	}
 }

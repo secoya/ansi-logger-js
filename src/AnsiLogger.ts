@@ -1,6 +1,9 @@
 import * as moment from 'moment';
 import { TextTransformer } from './TextTransformer';
 
+/**
+ * The internal data structure, that represents a single log entry.
+ */
 export interface LogEntry {
 	group?: string;
 	levelNumeric: Mask;
@@ -10,7 +13,9 @@ export interface LogEntry {
 }
 
 /**
- * Transforms
+ * Transforms `LogEntry` to `TOutput`
+ * And describes how to format complex types
+ * such as Array, Object and/or classes instances.
  */
 export interface Transformer<TOutput> {
 	format(entry: LogEntry): TOutput;
@@ -18,7 +23,7 @@ export interface Transformer<TOutput> {
 }
 
 /**
- * Contains each log level mask.
+ * Contains each mask for each log level.
  */
 export enum Mask {
 	ERROR = 0b0000001,
@@ -31,7 +36,8 @@ export enum Mask {
 }
 
 /**
- * Contains each pre compiled log levels.
+ * Contains all the accumulated applied masks.
+ * Each level contains it `own mask` and all levels before.
  */
 export enum Level {
 	SILENT = 0b0000000,
@@ -44,9 +50,26 @@ export enum Level {
 	VERBOSE = 0b1111111,
 }
 
-export interface LoggerOptionsInput<TOutput> {
+/**
+ * The available options to configure the top level logger.
+ */
+export interface LoggerOptions<TOutput> {
+	/**
+	 * The group to mark the log entries with.
+	 */
 	group: string;
+	/**
+	 * The log level mask.
+	 */
 	logLevel: number;
+	/**
+	 * The outputters, split interface
+	 * support the stderr and stdout.
+	 * Error log level outputs to `err`.
+	 * all other log levels are outputted to `out`.
+	 *
+	 * An outputter's is to "print" the transformed content.
+	 */
 	outputters: {
 		err: (msg: TOutput) => void,
 		out: (msg: TOutput) => void,
@@ -56,30 +79,59 @@ export interface LoggerOptionsInput<TOutput> {
 	 * @link http://momentjs.com
 	 */
 	timeformat: string;
+	/**
+	 * The transformer to convert LogEntry types
+	 * to what the outputters can print.
+	 */
 	transformer: Transformer<TOutput>;
 }
 
-export interface LoggerOptions<TOutput> {
+/**
+ * The internal options interface of `AnsiLogger`.
+ */
+export interface LoggerOptionsInternal<TOutput> {
+	/**
+	 * The group to mark the log entries with.
+	 */
 	group?: string;
+	/**
+	 * The log level mask.
+	 */
 	logLevel: number;
+	/**
+	 * The outputters, split interface
+	 * support the stderr and stdout.
+	 * Error log level outputs to `err`.
+	 * all other log levels are outputted to `out`.
+	 *
+	 * An outputter's is to "print" the transformed content.
+	 */
 	outputters: {
 		err: (msg: TOutput) => void;
 		out: (msg: TOutput) => void;
 	};
+	/**
+	 * Moment.js formats.
+	 * @link http://momentjs.com
+	 */
 	timeformat: string;
+	/**
+	 * The transformer to convert LogEntry types
+	 * to what the outputters can print.
+	 */
 	transformer: Transformer<TOutput>;
 }
 
-export type LogMask = keyof typeof Mask;
-export type LogLevel = keyof typeof Level;
-
+/**
+ * Utility function to determine if `level` is masked by `mask`.
+ */
 export function matchMask<T extends Mask>(level: number, mask: T): level is T {
 	// tslint:disable-next-line:no-bitwise
 	return (level & mask) === mask;
 }
 
 /**
- * Resolve a string representation of the logLevel.
+ * Resolve a string representation of the mask.
  */
 export function resolveLogLevel(mask: Mask): string {
 	switch (mask) {
@@ -104,21 +156,21 @@ export function resolveLogLevel(mask: Mask): string {
 }
 
 /**
- * Ansi output logger.
+ * Ansi Logger.
+ *
  * This controls what should be ouputted to the console,
  * everything is categorized into log levels, so when you set a log level
  * you output from all the selected levels.
  * It is possible to disables colors (some terminals don't support colors).
  * you can also specify that you are only interested in output for a specific
- * logLevel, then everything else is not outputted.
+ * log masks, then everything else is not outputted.
  * It is also possible to make the logger silent.
  */
 export class AnsiLogger<TOutput> {
-
 	/**
 	 * The options with defaults overriden by user input.
 	 */
-	public get options(): LoggerOptions<TOutput> {
+	public get options(): LoggerOptionsInternal<TOutput> {
 		return this._options;
 	}
 
@@ -128,12 +180,12 @@ export class AnsiLogger<TOutput> {
 	 * it can be changed by using the setOptions method.
 	 */
 	// tslint:disable-next-line:variable-name react-aware-member-ordering
-	private _options: LoggerOptions<TOutput>;
+	private _options: LoggerOptionsInternal<TOutput>;
 
 	/**
 	 * Constructs a Logger, and patch default values with the `options` passed.
 	 */
-	public constructor(options?: Partial<LoggerOptionsInput<TOutput>>) {
+	public constructor(options?: Partial<LoggerOptions<TOutput>>) {
 		const opts = options == null ? {} : options;
 		this._options = {
 			group: opts.group,
@@ -184,7 +236,7 @@ export class AnsiLogger<TOutput> {
 	/**
 	 * Print message(s) to debug log level if enabled.
 	 */
-	public debug<L>(firstArg: L, ...__: any[]): L {
+	public debug<E>(firstArg: E, ...__: any[]): E {
 		for (const msg of Array.from(arguments)) {
 			if (typeof msg === 'string') {
 				this.print(msg, Mask.DEBUG);
@@ -198,7 +250,7 @@ export class AnsiLogger<TOutput> {
 	/**
 	 * Print message(s) to error log level if enabled.
 	 */
-	public error<L>(firstArg: L, ...__: any[]): L {
+	public error<E>(firstArg: E, ...__: any[]): E {
 		for (const msg of Array.from(arguments)) {
 			if (msg instanceof Error || (typeof msg === 'object' && 'stack' in msg)) {
 				this.formatError(msg);
@@ -245,7 +297,7 @@ export class AnsiLogger<TOutput> {
 	/**
 	 * Print messeage(s) to info log level if enabled.
 	 */
-	public info<L>(firstArg: L, ...__: any[]): L {
+	public info<E>(firstArg: E, ...__: any[]): E {
 		for (const msg of Array.from(arguments)) {
 			if (typeof msg === 'string') {
 				this.print(msg, Mask.INFO);
@@ -259,7 +311,7 @@ export class AnsiLogger<TOutput> {
 	/**
 	 * Print message(s) to default log level if enabled..
 	 */
-	public log<L>(firstArg: L, ...__: any[]): L {
+	public log<E>(firstArg: E, ...__: any[]): E {
 		for (const msg of Array.from(arguments)) {
 			if (typeof msg === 'string') {
 				this.print(msg, Mask.LOG);
@@ -274,7 +326,7 @@ export class AnsiLogger<TOutput> {
 	 * Sets the options.
 	 */
 	public setOptions<LOutput = TOutput>(
-		options: Partial<LoggerOptionsInput<LOutput>>,
+		options: Partial<LoggerOptions<LOutput>>,
 	): AnsiLogger<LOutput> {
 		const currentLoglevel = this._options.logLevel;
 		const optionKeys = Array.from(Object.keys(this.options));
@@ -296,7 +348,7 @@ export class AnsiLogger<TOutput> {
 	/**
 	 * Print a success formatted message.
 	 */
-	public success<L>(firstArg: L, ...__: any[]): L {
+	public success<E>(firstArg: E, ...__: any[]): E {
 		for (const msg of Array.from(arguments)) {
 			this.print(msg, Mask.SUCCESS);
 		}
@@ -306,7 +358,7 @@ export class AnsiLogger<TOutput> {
 	/**
 	 * Print a verbose formatted message.
 	 */
-	public verbose<L>(firstArg: L, ...__: any[]): L {
+	public verbose<E>(firstArg: E, ...__: any[]): E {
 		for (const msg of Array.from(arguments)) {
 			this.print(msg, Mask.VERBOSE);
 		}
@@ -314,9 +366,9 @@ export class AnsiLogger<TOutput> {
 	}
 
 	/**
-	 * Print a warning.
+	 * Print a warning formatted message.
 	 */
-	public warn<L>(firstArg: L, ...__: any[]): L {
+	public warn<E>(firstArg: E, ...__: any[]): E {
 		for (const msg of Array.from(arguments)) {
 			this.print(msg, Mask.WARN);
 		}
