@@ -1,0 +1,6 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JSONTransformer format format complex types 1`] = `
+"{\\"group\\":\\"json\\",\\"levelNumeric\\":16,\\"levelText\\":\\"INFO\\",\\"message\\":{\\"some\\":\\"complex\\",\\"structure\\":[1,true]},\\"timestamp\\":\\"NOW\\"}
+"
+`;

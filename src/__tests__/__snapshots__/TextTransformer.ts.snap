@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TextTransformer colors force colors option, results in colors are always used, even when printing to a non tty and colors option is disabled 1`] = `
+"[[36mNOW[39m] [[33mtext[39m] [[34mINFO[39m]    [34minfo[39m
+"
+`;
+
+exports[`TextTransformer colors setting invalid coloring function throws 1`] = `"Unsupported option INVALID"`;
+
+exports[`TextTransformer format complex types 1`] = `
+"[0000-00-00 00:00:00.000+0000] [INFO]    {
+[0000-00-00 00:00:00.000+0000] [INFO]        featureEnabled: false
+[0000-00-00 00:00:00.000+0000] [INFO]        fn: [Function: fn]
+[0000-00-00 00:00:00.000+0000] [INFO]        list: [ '1', '2', '3' ]
+[0000-00-00 00:00:00.000+0000] [INFO]        nested: {
+[0000-00-00 00:00:00.000+0000] [INFO]            level: {
+[0000-00-00 00:00:00.000+0000] [INFO]                must: object
+[0000-00-00 00:00:00.000+0000] [INFO]            }
+[0000-00-00 00:00:00.000+0000] [INFO]        }
+[0000-00-00 00:00:00.000+0000] [INFO]        noValue: {
+[0000-00-00 00:00:00.000+0000] [INFO]            provided: null
+[0000-00-00 00:00:00.000+0000] [INFO]            unprovided: undefined
+[0000-00-00 00:00:00.000+0000] [INFO]        }
+[0000-00-00 00:00:00.000+0000] [INFO]        numeric: 3.141592653589793
+[0000-00-00 00:00:00.000+0000] [INFO]        string: 'complex'
+[0000-00-00 00:00:00.000+0000] [INFO]        transformer: TextTransformer
+[0000-00-00 00:00:00.000+0000] [INFO]    }
+"
+`;
+
+exports[`TextTransformer format custom level text mask, will simply output get outputtet as is 1`] = `
+"[NOW] [text] [INFO]    message
+"
+`;
+
+exports[`TextTransformer format formatting errors without stack does not fail 1`] = `
+"[NOW] [text] [ERROR]   Error: Error: no stack
+"
+`;
+
+exports[`TextTransformer format unknown numeric level mask, without custom level text, will output UNKNOWN 1`] = `
+"[NOW] [text] [INFO]    message
+"
+`;
+
+exports[`TextTransformer formatTypes formatting errors without stack without breaking 1`] = `
+"{
+    errors: [ Without stack, With stack
+        Error: With stack
+at ... Mock stack trace ]
+}"
+`;
+
+exports[`TextTransformer formatTypes named functions get outputted with name suffix 1`] = `
+"{
+    fns: [ Function ]
+    withName: [Function: withName]
+}"
+`;

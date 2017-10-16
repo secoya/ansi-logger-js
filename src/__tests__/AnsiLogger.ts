@@ -1,13 +1,21 @@
+import { resolveLogLevel } from '../AnsiLogger';
 import AnsiLogger, { JSONTransformer, Level, Mask } from '../index';
 import { TextTransformer } from '../TextTransformer';
 // tslint:disable:max-line-length
 
+const mockTimeformat = '0000-00-00 00:00:00';
+
 const getSimpleLogger = (logLevel?: number, err?: any, out?: any) => {
 	return new AnsiLogger({
 		logLevel: logLevel == null ? Level.INFO : logLevel,
-		outputters: { err: err || jest.fn(), out: out || jest.fn() },
-		timeformat: '0000-00-00 00:00:00',
-		transformer: new TextTransformer({ colors: false }),
+		timeformat: mockTimeformat,
+		transformer: new TextTransformer({
+			colors: false,
+			printer: {
+				err: err || jest.fn(),
+				out: out || jest.fn(),
+			},
+		}),
 	});
 };
 
@@ -19,7 +27,7 @@ class MockError extends Error {
 	}
 }
 
-const outputToAllLevels = <E>(logger: AnsiLogger<E>) => {
+const outputToAllLevels = (logger: AnsiLogger<any>) => {
 	logger.error('error');
 	logger.warn('warn');
 	logger.success('success');
@@ -169,9 +177,8 @@ describe('Logger', () => {
 		const logger = new AnsiLogger({
 			group: 'GROUP',
 			logLevel: Level.DEBUG,
-			outputters: { out, err },
 			timeformat: '0000-00-00 00:00:00',
-			transformer: new TextTransformer({ colors: false }),
+			transformer: new TextTransformer({ colors: false, printer: { err, out } }),
 		});
 
 		logger.info('info text');
@@ -197,9 +204,14 @@ describe('Logger', () => {
 	test('simple json output', () => {
 		const err = jest.fn();
 		const out = jest.fn();
-		const logger = getSimpleLogger(Level.VERBOSE, err, out).setOptions({
+		const logger = new AnsiLogger({
 			group: 'json',
-			transformer: new JSONTransformer(),
+			logLevel: Level.VERBOSE,
+			timeformat: mockTimeformat,
+			transformer: new JSONTransformer({
+				err: err,
+				out: out,
+			}),
 		});
 
 		outputToAllLevels(logger);
@@ -227,10 +239,47 @@ describe('Logger', () => {
 		]);
 	});
 
+	test('multiple arguments to all', () => {
+		const err = jest.fn();
+		const out = jest.fn();
+		const logger = getSimpleLogger(Level.VERBOSE, err, out);
+
+		logger.error('error', 'error1');
+		logger.warn('warn', 'warn1');
+		logger.success('success', 'success1');
+		logger.log('log', 'log1');
+		logger.info('info', 'info1');
+		logger.debug('debug', 'debug1');
+		logger.verbose('verbose', 'verbose1');
+
+		expect(err.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [ERROR]   error\n']);
+		expect(err.mock.calls[1]).toEqual(['[0000-00-00 00:00:00] [ERROR]   error1\n']);
+		expect(out.mock.calls[0]).toEqual(['[0000-00-00 00:00:00] [WARN]    warn\n']);
+		expect(out.mock.calls[1]).toEqual(['[0000-00-00 00:00:00] [WARN]    warn1\n']);
+		expect(out.mock.calls[2]).toEqual(['[0000-00-00 00:00:00] [SUCCESS] success\n']);
+		expect(out.mock.calls[3]).toEqual(['[0000-00-00 00:00:00] [SUCCESS] success1\n']);
+		expect(out.mock.calls[4]).toEqual(['[0000-00-00 00:00:00] [LOG]     log\n']);
+		expect(out.mock.calls[5]).toEqual(['[0000-00-00 00:00:00] [LOG]     log1\n']);
+		expect(out.mock.calls[6]).toEqual(['[0000-00-00 00:00:00] [INFO]    info\n']);
+		expect(out.mock.calls[7]).toEqual(['[0000-00-00 00:00:00] [INFO]    info1\n']);
+		expect(out.mock.calls[8]).toEqual(['[0000-00-00 00:00:00] [DEBUG]   debug\n']);
+		expect(out.mock.calls[9]).toEqual(['[0000-00-00 00:00:00] [DEBUG]   debug1\n']);
+		expect(out.mock.calls[10]).toEqual(['[0000-00-00 00:00:00] [VERBOSE] verbose\n']);
+		expect(out.mock.calls[11]).toEqual(['[0000-00-00 00:00:00] [VERBOSE] verbose1\n']);
+	});
+
 	test('json complex types output', () => {
 		const err = jest.fn();
 		const out = jest.fn();
-		const logger = getSimpleLogger(Level.VERBOSE, err, out).setOptions({ group: 'json', transformer: new JSONTransformer() });
+		const logger = new AnsiLogger({
+			group: 'json',
+			logLevel: Level.VERBOSE,
+			timeformat: mockTimeformat,
+			transformer: new JSONTransformer({
+				err: err,
+				out: out,
+			}),
+		});
 
 		logger.debug({ host: 'localhost', name: 'test', pass: 'test', user: 'test' });
 
@@ -241,10 +290,91 @@ describe('Logger', () => {
 		const err = jest.fn();
 		const out = jest.fn();
 
-		const logger = getSimpleLogger(Level.VERBOSE, err, out).setOptions({ group: 'text' });
+		const logger = new AnsiLogger({
+			group: 'text',
+			logLevel: Level.VERBOSE,
+			timeformat: mockTimeformat,
+			transformer: new TextTransformer({
+				printer: {
+					err: err,
+					out: out,
+				},
+			}),
+		});
 
 		logger.debug({ host: 'localhost', name: 'test', pass: 'test', user: 'test' });
 
 		expect(out.mock.calls[0]).toMatchSnapshot();
+	});
+
+	describe('complex types for each level', () => {
+		test('error', () => {
+			const logger = getSimpleLogger(Level.VERBOSE);
+			const message = 'error';
+			logger.formatTypes = jest.fn().mockReturnValue(message);
+			logger.error({ message: message });
+			expect(logger.formatTypes).toHaveBeenCalled();
+		});
+		test('warn', () => {
+			const logger = getSimpleLogger(Level.VERBOSE);
+			const message = 'warn';
+			logger.formatTypes = jest.fn().mockReturnValue(message);
+			logger.warn({ message: message });
+			expect(logger.formatTypes).toHaveBeenCalled();
+		});
+		test('success', () => {
+			const logger = getSimpleLogger(Level.VERBOSE);
+			const message = 'success';
+			logger.formatTypes = jest.fn().mockReturnValue(message);
+			logger.success({ message: message });
+			expect(logger.formatTypes).toHaveBeenCalled();
+		});
+		test('log', () => {
+			const logger = getSimpleLogger(Level.VERBOSE);
+			const message = 'log';
+			logger.formatTypes = jest.fn().mockReturnValue(message);
+			logger.log({ message: message });
+			expect(logger.formatTypes).toHaveBeenCalled();
+		});
+		test('info', () => {
+			const logger = getSimpleLogger(Level.VERBOSE);
+			const message = 'info';
+			logger.formatTypes = jest.fn().mockReturnValue(message);
+			logger.info({ message: message });
+			expect(logger.formatTypes).toHaveBeenCalled();
+		});
+		test('debug', () => {
+			const logger = getSimpleLogger(Level.VERBOSE);
+			const message = 'debug';
+			logger.formatTypes = jest.fn().mockReturnValue(message);
+			logger.debug({ message: message });
+			expect(logger.formatTypes).toHaveBeenCalled();
+		});
+		test('verbose', () => {
+			const logger = getSimpleLogger(Level.VERBOSE);
+			const message = 'verbose';
+			logger.formatTypes = jest.fn().mockReturnValue(message);
+			logger.verbose({ message: message });
+			expect(logger.formatTypes).toHaveBeenCalled();
+		});
+	});
+
+	describe('error', () => {
+		test('formatError is called on custom error objects with stack property', () => {
+			const logger = getSimpleLogger();
+			const message = 'Error';
+			logger.formatError = jest.fn().mockReturnValue(message);
+			logger.error({
+				message: message,
+				stack: 'Error: With custom stack',
+			});
+			expect(logger.formatError).toHaveBeenCalled();
+		});
+	});
+});
+
+describe('resolveLogLevel', () => {
+	test('resolving non-existing log mask returns UNKNOWN', () => {
+		expect(resolveLogLevel(-10)).toMatchSnapshot();
 	});
 });

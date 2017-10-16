@@ -39,15 +39,22 @@ export interface TextTransformerOptions {
 	/**
 	 * The map of which coloring functions to use when/where.
 	 */
-	colorMap: Partial<ColorMap>;
+	colorMap?: Partial<ColorMap>;
 	/**
 	 * Whether or not if colors is enabled, default: `process.stdout.isTTY`.
 	 */
-	colors: boolean;
+	colors?: boolean;
 	/**
 	 * Always output colors, no matter if stdout is a TTY.
 	 */
-	forceColors: boolean;
+	forceColors?: boolean;
+	/**
+	 * The printer.
+	 */
+	printer?: {
+		err: (msg: string) => void;
+		out: (msg: string) => void;
+	};
 }
 
 /**
@@ -67,20 +74,13 @@ export interface TextTransformerOptionsInternal {
 /**
  * Transformer from log entries to human readable colorized text.
  */
-export class TextTransformer<E extends string = string> implements Transformer<E> {
-	public get options(): TextTransformerOptionsInternal {
-		return this._options;
-	}
-
+export class TextTransformer implements Transformer<string> {
 	/**
 	 * Whether or not this transformer outputs colored text.
 	 */
 	public get useColors(): boolean {
-		return this._options.forceColors || (!!process.stdout.isTTY && this.options.colors);
+		return this.options.forceColors || (!!process.stdout.isTTY && this.options.colors);
 	}
-
-	// tslint:disable-next-line:variable-name
-	private _options: TextTransformerOptionsInternal;
 
 	// tslint:disable:object-literal-sort-keys
 	/**
@@ -101,80 +101,32 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 	};
 	// tslint:enable:object-literal-sort-keys
 
-	public constructor(options?: Partial<TextTransformerOptions>) {
-		this._options = {
-			colors: true,
-			forceColors: false,
-		};
+	public readonly options: Readonly<TextTransformerOptionsInternal>;
 
-		if (options != null) {
-			this.setOptions(options);
+	public readonly printer: {
+		readonly err: (msg: string) => void;
+		readonly out: (msg: string) => void;
+	};
+
+	public constructor(options?: TextTransformerOptions) {
+		const opts = options == null ? {} : options;
+		this.options = Object.freeze({
+			colors: !!opts.colors,
+			forceColors: opts.forceColors || false,
+		});
+
+		this.printer = Object.freeze(opts.printer || {
+			err: (msg: string) => {
+				process.stderr.write(msg);
+			},
+			out: (msg: string) => {
+				process.stdout.write(msg);
+			},
+		});
+
+		if (opts.colorMap != null) {
+			this.setColors(opts.colorMap);
 		}
-	}
-
-	private _formatTypes(inputType: any, depth: number = 3, indent: number = 0): E {
-		// making the proper indentation
-		let val;
-
-		const pad = ' '.repeat(indent > 0 ? indent - 1 : 0);
-
-		// primitive types
-		if (typeof inputType === 'number' || typeof inputType === 'boolean' || inputType == null) {
-			return `${pad}${inputType}` as E;
-		}
-
-		if (typeof inputType === 'string') {
-			return `${pad}'${inputType}'` as E;
-		}
-
-		// array is formatted as one-liners
-		if (Array.isArray(inputType) && indent < depth) {
-			let str = `${pad}[`;
-			// tslint:disable-next-line:forin
-			for (const key of Array.from(inputType.keys())) {
-				val = inputType[key];
-				str += ` ${this._formatTypes(val, indent + 1, depth).trim()}`;
-				str += ((key as any) as number) < inputType.length - 1 ? ',' : ' ';
-			}
-			return `${str}]` as E;
-		}
-
-		// hashes is formatted with indentation for every level
-		// of the object, the values of the properties are also resolved.
-		if (typeof inputType === 'object') {
-			const cname = inputType.constructor.name;
-			if (cname === 'Error' || inputType instanceof Error) {
-				let str = `${pad}${inputType.message}`;
-				if (inputType.stack != null) {
-					str += `\n${pad}${inputType.stack}`;
-				}
-				return str as E;
-			} else if (cname === 'Object' && indent < depth) {
-				let str = `${pad}{`;
-				for (const key of Array.from(Object.keys(inputType))) {
-					val = inputType[key];
-					str += `\n${pad}  ${key}: ${this._formatTypes(val, indent + 1, depth).trim()}`;
-				}
-				if (str.length > pad.length + 1) {
-					str += `\n${pad}`;
-				}
-				return `${str}}` as E;
-			}
-		}
-
-		// print the name of a complex type.
-		const isFunc = typeof inputType === 'function';
-		if (isFunc) {
-			const cname = inputType.constructor.name;
-			if (isFunc && cname !== 'Function') {
-				return `${pad}[Function: ${cname}]` as E;
-			}
-			return `${pad}${cname}` as E;
-		}
-
-		// print the name of an unhandled type.
-		// typically this will return 'object'
-		return `${pad}${typeof inputType}` as E;
 	}
 
 	/**
@@ -219,6 +171,71 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 	 */
 	private formatTime(time: string): string {
 		return `[${this.colorize(time, this.colors.TIME)}]`;
+	}
+
+	private formatTypesInternal(inputType: any, depth: number = 3, indent: number = 0): string {
+		// making the proper indentation
+		let val;
+
+		const pad = '    '.repeat(indent > 0 ? indent : 0);
+
+		// primitive types
+		if (typeof inputType === 'number' || typeof inputType === 'boolean') {
+			return `${pad}${inputType}`;
+
+			// tslint:disable-next-line:no-typeof-undefined
+		} else if (typeof inputType === 'undefined') {
+			return `${pad}undefined`;
+		} else if (inputType === null) {
+			return `${pad}null`;
+		} else if (typeof inputType === 'string') {
+			return `${pad}'${inputType}'`;
+
+			// array is formatted as one-liners
+		} else if (Array.isArray(inputType) && indent < depth) {
+			let str = `${pad}[`;
+			// tslint:disable-next-line:forin
+			for (const key of Array.from(inputType.keys())) {
+				val = inputType[key];
+				str += ` ${this.formatTypesInternal(val, depth, indent + 1).trim()}`;
+				str += ((key as any) as number) < inputType.length - 1 ? ',' : ' ';
+			}
+			return `${str}]`;
+
+			// hashes is formatted with indentation for every level
+			// of the object, the values of the properties are also resolved.
+		} else if (typeof inputType === 'object') {
+			const cname = inputType.constructor.name;
+			if (cname === 'Error' || inputType instanceof Error) {
+				let str = `${pad}${inputType.message}`;
+				if (inputType.stack != null) {
+					str += `\n${pad}${inputType.stack}`;
+				}
+				return str;
+			} else if (cname === 'Object' && indent < depth) {
+				let str = `${pad}{`;
+				for (const key of Array.from(Object.keys(inputType))) {
+					val = inputType[key];
+					str += `\n${pad}    ${key}: ${this.formatTypesInternal(val, depth, indent + 1).trim()}`;
+				}
+				if (str.length > pad.length + 1) {
+					str += `\n${pad}`;
+				}
+				return `${str}}`;
+			} else if (cname !== 'Object') {
+				return `${pad}${cname}`;
+			}
+		} else if (typeof inputType === 'function') {
+			const cname = inputType.name;
+			if (cname && cname !== 'Function') {
+				return `${pad}[Function: ${cname}]`;
+			} else {
+				return `${pad}Function`;
+			}
+		}
+		// print the name of an unhandled type.
+		// typically this will return 'object'
+		return `${pad}${typeof inputType}`;
 	}
 
 	/**
@@ -307,7 +324,7 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 	/**
 	 * Transform log entry to text output.
 	 */
-	public format(entry: LogEntry): E {
+	public format(entry: LogEntry): string {
 		// get the formatted current time.
 		let prefix = this.formatTime(entry.timestamp);
 
@@ -317,39 +334,18 @@ export class TextTransformer<E extends string = string> implements Transformer<E
 		}
 
 		// get the formatted log-level.
-		if (entry.levelText != null) {
-			const levelText = this.formatLogLevel(entry.levelNumeric);
-			if (levelText != null) {
-				prefix += ` ${levelText}`;
-			}
-		}
+		const levelText = this.formatLogLevel(entry.levelNumeric);
+		prefix += ` ${levelText}`;
 
 		return (
 			this.handleMultiline(prefix + ' ', String(entry.message), this.resolveLevelColor(entry.levelNumeric)) + '\n'
-		) as any as E;
+		);
 	}
 
 	/**
 	 * Format complex types.
 	 */
-	public formatTypes(inputType: any): E {
-		return this._formatTypes(inputType) as E;
-	}
-
-	/**
-	 * Set new options.
-	 */
-	public setOptions(options: Partial<TextTransformerOptions>): void {
-		if (options.colorMap != null) {
-			this.setColors(options.colorMap);
-		}
-
-		const optionKeys = Array.from(Object.keys(this.options)) as (keyof TextTransformerOptionsInternal)[];
-		for (const key of optionKeys) {
-			const val = options[key];
-			if (val != null) {
-				this._options[key] = val;
-			}
-		}
+	public formatTypes<T>(inputType: T): string {
+		return this.formatTypesInternal(inputType);
 	}
 }

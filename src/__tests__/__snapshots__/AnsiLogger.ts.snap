@@ -30,10 +30,10 @@ Array [
 exports[`Logger text complex types output 1`] = `
 Array [
   "[0000-00-00 00:00:00] [text] [DEBUG]   {
-[0000-00-00 00:00:00] [text] [DEBUG]     host: 'localhost'
-[0000-00-00 00:00:00] [text] [DEBUG]     name: 'test'
-[0000-00-00 00:00:00] [text] [DEBUG]     pass: 'test'
-[0000-00-00 00:00:00] [text] [DEBUG]     user: 'test'
+[0000-00-00 00:00:00] [text] [DEBUG]       host: 'localhost'
+[0000-00-00 00:00:00] [text] [DEBUG]       name: 'test'
+[0000-00-00 00:00:00] [text] [DEBUG]       pass: 'test'
+[0000-00-00 00:00:00] [text] [DEBUG]       user: 'test'
 [0000-00-00 00:00:00] [text] [DEBUG]   }
 ",
 ]
@@ -45,3 +45,5 @@ Array [
 ",
 ]
 `;
+
+exports[`resolveLogLevel resolving non-existing log mask returns UNKNOWN 1`] = `"UNKNOWN"`;

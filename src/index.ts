@@ -12,9 +12,11 @@ import { TextTransformer } from './TextTransformer';
  * Create a simple text logger, generally used to output human readable
  * format to the console.
  */
-export function createTextLogger(group?: string): AnsiLogger<string> {
+export function createTextLogger(options?: { group?: string, logLevel?: number }): AnsiLogger<TextTransformer> {
+	const opts = options == null ? {} : options;
 	return new AnsiLogger({
-		group: group,
+		group: opts.group,
+		logLevel: opts.logLevel,
 		transformer: new TextTransformer(),
 	});
 }
@@ -22,9 +24,11 @@ export function createTextLogger(group?: string): AnsiLogger<string> {
  * Create simple JSON logger, generally used for when outputting
  * to log services like e.g. Log Stash.
  */
-export function createJSONLogger(group?: string): AnsiLogger<string> {
+export function createJSONLogger(options?: { group?: string, logLevel?: number }): AnsiLogger<JSONTransformer> {
+	const opts = options == null ? {} : options;
 	return new AnsiLogger({
-		group: group,
+		group: opts.group,
+		logLevel: opts.logLevel,
 		transformer: new JSONTransformer(),
 	});
 }
