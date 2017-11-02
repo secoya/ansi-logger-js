@@ -103,14 +103,14 @@ export function createLoggerFromEnvironment(options?: {
 		loggerOptions.logLevel = logLevel;
 	}
 
-	return logFormat === 'JSON'
-		? createJSONLogger({
-				group: opts.group,
-				logLevel: loggerOptions.logLevel,
-			})
-		: createTextLogger({
+	return logFormat === 'TEXT'
+		? createTextLogger({
 				group: opts.group,
 				groupColor: opts.groupColor,
+				logLevel: loggerOptions.logLevel,
+			})
+		: createJSONLogger({
+				group: opts.group,
 				logLevel: loggerOptions.logLevel,
 			});
 }

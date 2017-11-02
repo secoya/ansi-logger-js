@@ -116,10 +116,10 @@ describe('createLoggerFromEnvironment', () => {
 
 	test('when creating a text logger from the group color is passed', () => {
 		let logger;
-		logger = createLoggerFromEnvironment({ groupColor: clc.red });
+		logger = createLoggerFromEnvironment({ groupColor: clc.red, logFormat: 'TEXT' });
 		expect((logger.options.transformer as TextTransformer).colors.GROUP).toBe(clc.red);
 
-		logger = createLoggerFromEnvironment({ groupColor: clc.green });
+		logger = createLoggerFromEnvironment({ groupColor: clc.green, logFormat: 'TEXT' });
 		expect((logger.options.transformer as TextTransformer).colors.GROUP).toBe(clc.green);
 	});
 
