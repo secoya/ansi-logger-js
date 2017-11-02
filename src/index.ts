@@ -87,7 +87,7 @@ export function createLoggerFromEnvironment(options?: {
 	groupColor?: Format;
 	logFormat?: 'TEXT' | 'JSON';
 	logLevel?: number | Level;
-}): AnsiLogger<Transformer<any>> {
+}): AnsiLogger<Transformer<string>> {
 	const opts = options == null ? {} : options;
 
 	const loggerOptions: Partial<LoggerOptions<any>> = {};
