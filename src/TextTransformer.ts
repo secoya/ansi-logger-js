@@ -14,23 +14,12 @@ import { matchMask, resolveLogLevel, LogEntry, Mask, Transformer } from './AnsiL
  * - GROUP   - The color of the `group section` of the output.
  * - TIME    - The color of the `time section` of the output.
  */
-export type ColorType =
-	| 'ERROR'
-	| 'WARN'
-	| 'SUCCESS'
-	| 'LOG'
-	| 'INFO'
-	| 'DEBUG'
-	| 'VERBOSE'
-	| 'GROUP'
-	| 'TIME';
+export type ColorType = 'ERROR' | 'WARN' | 'SUCCESS' | 'LOG' | 'INFO' | 'DEBUG' | 'VERBOSE' | 'GROUP' | 'TIME';
 
 /**
  * The map from `ColorType`s to a coloring functions.
  */
-export type ColorMap = {
-	[P in ColorType]: clc.Format;
-};
+export type ColorMap = { [P in ColorType]: clc.Format };
 
 /**
  * Options interface for text transformer.
@@ -111,18 +100,20 @@ export class TextTransformer implements Transformer<string> {
 	public constructor(options?: TextTransformerOptions) {
 		const opts = options == null ? {} : options;
 		this.options = Object.freeze({
-			colors: !!opts.colors,
+			colors: opts.colors == null ? true : opts.colors,
 			forceColors: opts.forceColors || false,
 		});
 
-		this.printer = Object.freeze(opts.printer || {
-			err: (msg: string) => {
-				process.stderr.write(msg);
+		this.printer = Object.freeze(
+			opts.printer || {
+				err: (msg: string) => {
+					process.stderr.write(msg);
+				},
+				out: (msg: string) => {
+					process.stdout.write(msg);
+				},
 			},
-			out: (msg: string) => {
-				process.stdout.write(msg);
-			},
-		});
+		);
 
 		if (opts.colorMap != null) {
 			this.setColors(opts.colorMap);

@@ -8,38 +8,38 @@ exports[`TextTransformer colors force colors option, results in colors are alway
 exports[`TextTransformer colors setting invalid coloring function throws 1`] = `"Unsupported option INVALID"`;
 
 exports[`TextTransformer format complex types 1`] = `
-"[0000-00-00 00:00:00.000+0000] [INFO]    {
-[0000-00-00 00:00:00.000+0000] [INFO]        featureEnabled: false
-[0000-00-00 00:00:00.000+0000] [INFO]        fn: [Function: fn]
-[0000-00-00 00:00:00.000+0000] [INFO]        list: [ '1', '2', '3' ]
-[0000-00-00 00:00:00.000+0000] [INFO]        nested: {
-[0000-00-00 00:00:00.000+0000] [INFO]            level: {
-[0000-00-00 00:00:00.000+0000] [INFO]                must: object
-[0000-00-00 00:00:00.000+0000] [INFO]            }
-[0000-00-00 00:00:00.000+0000] [INFO]        }
-[0000-00-00 00:00:00.000+0000] [INFO]        noValue: {
-[0000-00-00 00:00:00.000+0000] [INFO]            provided: null
-[0000-00-00 00:00:00.000+0000] [INFO]            unprovided: undefined
-[0000-00-00 00:00:00.000+0000] [INFO]        }
-[0000-00-00 00:00:00.000+0000] [INFO]        numeric: 3.141592653589793
-[0000-00-00 00:00:00.000+0000] [INFO]        string: 'complex'
-[0000-00-00 00:00:00.000+0000] [INFO]        transformer: TextTransformer
-[0000-00-00 00:00:00.000+0000] [INFO]    }
+"[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m{[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m    featureEnabled: false[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m    fn: [Function: fn][39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m    list: [ '1', '2', '3' ][39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m    nested: {[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m        level: {[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m            must: object[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m        }[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m    }[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m    noValue: {[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m        provided: null[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m        unprovided: undefined[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m    }[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m    numeric: 3.141592653589793[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m    string: 'complex'[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m    transformer: TextTransformer[39m
+[[36m0000-00-00 00:00:00.000+0000[39m] [[34mINFO[39m]    [34m}[39m
 "
 `;
 
 exports[`TextTransformer format custom level text mask, will simply output get outputtet as is 1`] = `
-"[NOW] [text] [INFO]    message
+"[[36mNOW[39m] [[33mtext[39m] [[34mINFO[39m]    [34mmessage[39m
 "
 `;
 
 exports[`TextTransformer format formatting errors without stack does not fail 1`] = `
-"[NOW] [text] [ERROR]   Error: Error: no stack
+"[[36mNOW[39m] [[33mtext[39m] [[41m[37mERROR[39m[49m]   [41m[37mError: Error: no stack[39m[49m
 "
 `;
 
 exports[`TextTransformer format unknown numeric level mask, without custom level text, will output UNKNOWN 1`] = `
-"[NOW] [text] [INFO]    message
+"[[36mNOW[39m] [[33mtext[39m] [[34mINFO[39m]    [34mmessage[39m
 "
 `;
 

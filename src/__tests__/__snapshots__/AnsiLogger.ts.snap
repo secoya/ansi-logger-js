@@ -29,12 +29,12 @@ Array [
 
 exports[`Logger text complex types output 1`] = `
 Array [
-  "[0000-00-00 00:00:00] [text] [DEBUG]   {
-[0000-00-00 00:00:00] [text] [DEBUG]       host: 'localhost'
-[0000-00-00 00:00:00] [text] [DEBUG]       name: 'test'
-[0000-00-00 00:00:00] [text] [DEBUG]       pass: 'test'
-[0000-00-00 00:00:00] [text] [DEBUG]       user: 'test'
-[0000-00-00 00:00:00] [text] [DEBUG]   }
+  "[[36m0000-00-00 00:00:00[39m] [[33mtext[39m] [[33mDEBUG[39m]   [33m{[39m
+[[36m0000-00-00 00:00:00[39m] [[33mtext[39m] [[33mDEBUG[39m]   [33m    host: 'localhost'[39m
+[[36m0000-00-00 00:00:00[39m] [[33mtext[39m] [[33mDEBUG[39m]   [33m    name: 'test'[39m
+[[36m0000-00-00 00:00:00[39m] [[33mtext[39m] [[33mDEBUG[39m]   [33m    pass: 'test'[39m
+[[36m0000-00-00 00:00:00[39m] [[33mtext[39m] [[33mDEBUG[39m]   [33m    user: 'test'[39m
+[[36m0000-00-00 00:00:00[39m] [[33mtext[39m] [[33mDEBUG[39m]   [33m}[39m
 ",
 ]
 `;
