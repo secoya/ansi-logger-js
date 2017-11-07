@@ -3,7 +3,7 @@
 	"bin": {
 		"ansi-logger": "./bin/cli.js"
 	},
-	"bugs": "https://github.com/secoya/ansi-logger-js",
+	"bugs": "https://github.com/secoya/ansi-logger-js/issues",
 	"contributors": [
 		{
 			"name": "Brian K. Christensen",
