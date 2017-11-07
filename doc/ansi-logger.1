@@ -1,0 +1,116 @@
+.\" Manpage for ansi-logger.
+.\" Contact briankchritensen@gmail.com to correct errors or typos.
+
+.TH man 1 "07 Nov 2017" "3.1.3" "ansi-logger man page"
+
+.SH NAME
+ansi-logger \- format JSON entries to colored output.
+
+.SH SYNOPSIS
+.B ansi-logger
+[\fB\-f\fR \fIFILE\fR]
+[\fB\-l\fR \fILEVEL\fR | \fB-m\fR \fIMASKS\fR]
+[\fB\-s\fR]
+
+.SH DESCRIPTION
+.RE
+Creating logs with the JSONTransformer of the ansi-logger library,
+.RE
+is great for production environment for forwarding to log services like logstash.
+.RE
+This tool can parse the JSON logs and output it via the TextTransformer.
+
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Show this help message.
+
+.TP
+.BR \-f ", " \-\-file =\fIFILE\fR
+The log file to parse and format [default: -].
+
+.TP
+.BR \-l ", " \-\-loglevel =\fILEVEL\fR
+The output levle [default: VERBOSE].
+
+.TP
+.BR \-m ", " \-\-logmasks =\fIMASKS\fR
+Comma separated list of log masks to output.
+
+.SH LEVEL OPTIONS
+.TP
+.IR SILENT
+Silent all output.
+
+.TP
+.IR ERROR
+Output only error entries.
+
+.TP
+.IR WARN
+Output error and warn entries.
+
+.TP
+.IR LOG
+Output error, warn and log entries.
+
+.TP
+.IR INFO
+Output error, warn, log and info entries.
+
+.TP
+.IR DEBUG
+Output error, warn, log, info and debug entries.
+
+.TP
+.IR VERBOSE
+Output error, warn, log, info, debug and verbose entries.
+
+.SH MASKS OPTIONS
+
+.TP
+.IR ERROR
+Output error entries.
+
+.TP
+.IR WARN
+Output warn entries.
+
+.TP
+.IR LOG
+Output log entries.
+
+.TP
+.IR INFO
+Output info entries.
+
+.TP
+.IR DEBUG
+Output debug entries.
+
+.TP
+.IR VERBOSE
+Output verbose entries.
+
+.SH EXAMPLES
+.TP
+Only output log entries from INFO and DEBUG
+tail -n200 -f big.log | \fBansi-logger\fR \fB\-m\fR \fIINFO\fR,\fIDEBUG\fR
+
+.TP
+Only output log entries from ERROR and WARN
+tail -n200 -f big.log | \fBansi-logger\fR \fB\-l\fR \fIWARN\fR
+
+.TP
+Redirect file to stdin
+\fBansi-logger\fR < ./big.log | less
+
+.TP
+Use file switch to read a log file
+\fBansi-logger\fR \fB\-f\fR \fI./big.log\fR | less
+
+.SH BUGS
+Report bugs at https://github.com/secoya/ansi-logger-js
+
+.SH AUTHOR
+Brian K. Christensen <briankchritensen@gmail.com>
