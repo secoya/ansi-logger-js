@@ -1,35 +1,119 @@
 #!/usr/bin/env node
 'use strict';
 
+const __doc__ = `Usage: ansi-logger [-f FILE] [-l LEVEL | -m MASKS]
+
+Options:
+  -h --help            Show this help message.
+  -f --file FILE       The log file to parse and format [default: -].
+  -l --loglevel LEVEL  The level output [default: VERBOSE].
+  -m --logmasks MASKS  Comma separated list of log masks to output.
+  -s --split-pipes     Direct error entries to stderr.
+
+Levels available:
+SILENT ERROR WARN SUCCESS LOG INFO DEBUG VERBOSE
+
+Masks available:
+ERROR WARN SUCCESS LOG INFO DEBUG VERBOSE
+
+Examples:
+
+# Only output log entries from INFO and DEBUG
+tail -n200 -f big.log | ansi-logger -m INFO,DEBUG
+
+# Only output log entries from ERROR and WARN
+tail -n200 -f big.log | ansi-logger -l WARN
+
+# Redirect file to stdin
+ansi-logger < ./big.log | less
+
+# Use file switch to read a log file
+ansi-logger -f ./big.log | less
+`;
+
 const tt = require('../lib/TextTransformer');
+const { Level, Mask, matchMask } = require('../lib/AnsiLogger');
 const readline = require('readline');
 const fs = require('fs');
+
+/**
+ * @param {{short?: string, long?: string}} argDefinition
+ * @return boolean
+ */
+function parseArgBool(argDefinition) {
+	const argIdx = process.argv.findIndex(
+		arg => arg.startsWith(argDefinition.short) || arg.startsWith(argDefinition.long),
+	);
+	return argIdx === -1 ? false : true;
+}
+
+/**
+ *
+ * @param {{short?: string, long?: string}} argDefinition
+ * @param {T=} defaultValue
+ * @template T
+ * @return {T | string}
+ */
+function parseArg(argDefinition, defaultValue) {
+	const argIdx = process.argv.findIndex(
+		arg => arg.startsWith(argDefinition.short) || arg.startsWith(argDefinition.long),
+	);
+
+	if (argIdx === -1) {
+		return defaultValue;
+	}
+
+	const arg = process.argv[argIdx];
+	for (const argDef of [argDefinition.short, argDefinition.long]) {
+		if (arg.startsWith(argDef)) {
+			if (arg.indexOf('=') === -1) {
+				if (arg.length > argDef.length) {
+					// support args like -t20 or --timeout20
+					return arg.substr(argDef.length);
+				} else {
+					// support args like -t 20 or --timeout 20
+					const nextArg = process.argv[argIdx + 1];
+					if (nextArg) {
+						return nextArg;
+					} else {
+						return defaultValue;
+					}
+				}
+			} else {
+				// support args like -t=20 or --timeout=20
+				return arg.split('=')[1];
+			}
+		}
+	}
+	return defaultValue;
+}
+
+if (parseArgBool({ short: '-h', long: '--help' })) {
+	process.stdout.write(__doc__);
+	process.exit(127);
+}
+const timeout = parseInt(parseArg({ short: '-t', long: '--timeout' }, '1'), 10);
+const file = parseArg({ short: '-f', long: '--file' }, '-');
+const splitPipes = parseArgBool({ short: '-s', long: '--split-pipes' });
+const logMasks = parseArg({ short: '-m', long: '--logmasks' }, '');
+const masks = logMasks.split(',').reduce((carry, item) => {
+	return carry | Mask[item];
+}, Level.SILENT);
+const logLevel = masks || Level[parseArg({ short: '-l', long: '--loglevel' }, 'VERBOSE')];
+
+const input = file === '-' ? process.stdin : fs.createReadStream(file);
 
 const transformer = new tt.TextTransformer({
 	forceColors: true,
 });
 
-const startupTimer = setTimeout(() => {
-	process.stderr.write('No data received from stdin');
-	process.exit(1);
-}, 1000);
-
-let input;
-if (process.argv[2] === '-f') {
-	const file = process.argv[3];
-	if (file == null) {
-		console.error('Missing file parameter');
-		process.exit(1);
-	}
-	input = file === '-' ? process.stdin : fs.createReadStream(file);
-} else {
-	input = process.stdin;
-}
-
-let splitPipes = false;
-if (process.argv.indexOf('-s') >= -1 || process.argv.indexOf('--split-pipes') >= -1) {
-	splitPipes = true;
-}
+const startupTimer =
+	timeout === 0
+		? null
+		: setTimeout(() => {
+				process.stderr.write('No data received from stdin');
+				process.exit(1);
+			}, timeout * 1000);
 
 const rl = readline.createInterface({
 	input: input,
@@ -44,17 +128,34 @@ rl.on('line', line => {
 	clearTimeout(startupTimer);
 	try {
 		const entry = JSON.parse(line);
+		if (!matchMask(logLevel, entry.levelNumeric)) {
+			return;
+		}
 		const formattedEntry = transformer.format(entry);
-		if (splitPipes && entry.levelNumeric === 1) {
+		if (splitPipes && entry.levelNumeric === Mask.ERROR) {
 			process.stderr.write(formattedEntry);
 		} else {
 			process.stdout.write(formattedEntry);
 		}
 	} catch (e) {
+		console.log('test');
 		process.stderr.write(e.stack);
 		process.exit(1);
 	}
 });
+
+// When piping output to another process e.g. less
+// then quitting the process can end up closing the pipe
+// before flushing the latest output, swallow that error type.
+function rethrowNonEPIPE(err) {
+	if (err.code === 'EPIPE') {
+		process.exit(0);
+		return;
+	}
+	throw err;
+}
+process.stdout.on('error', rethrowNonEPIPE);
+process.stderr.on('error', rethrowNonEPIPE);
 
 rl.on('end', () => {
 	process.exit(0);
