@@ -9,15 +9,17 @@ export class JSONTransformer implements Transformer<string> {
 		readonly out: (msg: string) => void;
 	};
 
-	public constructor(printer?: { err: (msg: string) => void, out: (msg: string) => void }) {
-		this.printer = Object.freeze(printer || {
-			err: (msg: string) => {
-				process.stderr.write(msg);
+	public constructor(printer?: { err: (msg: string) => void; out: (msg: string) => void }) {
+		this.printer = Object.freeze(
+			printer || {
+				err: (msg: string) => {
+					process.stderr.write(msg);
+				},
+				out: (msg: string) => {
+					process.stdout.write(msg);
+				},
 			},
-			out: (msg: string) => {
-				process.stdout.write(msg);
-			},
-		});
+		);
 	}
 
 	/**

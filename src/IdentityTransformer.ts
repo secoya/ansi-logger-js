@@ -10,7 +10,7 @@ export class IdentityTransformer implements Transformer<LogEntry> {
 		readonly out: (msg: LogEntry) => void;
 	};
 
-	public constructor(printer: { err: (msg: LogEntry) => void, out: (msg: LogEntry) => void }) {
+	public constructor(printer: { err: (msg: LogEntry) => void; out: (msg: LogEntry) => void }) {
 		this.printer = Object.freeze(printer);
 	}
 

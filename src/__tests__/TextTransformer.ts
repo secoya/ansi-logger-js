@@ -112,13 +112,15 @@ describe('TextTransformer', () => {
 
 			expect(transformer.useColors).toBe(true);
 
-			expect(transformer.format({
-				group: 'text',
-				levelNumeric: Mask.INFO,
-				levelText: resolveLogLevel(Mask.INFO),
-				message: 'info',
-				timestamp: 'NOW',
-			})).toMatchSnapshot();
+			expect(
+				transformer.format({
+					group: 'text',
+					levelNumeric: Mask.INFO,
+					levelText: resolveLogLevel(Mask.INFO),
+					message: 'info',
+					timestamp: 'NOW',
+				}),
+			).toMatchSnapshot();
 		});
 
 		test('setting color via options', () => {
@@ -153,7 +155,9 @@ describe('TextTransformer', () => {
 
 		test('setting invalid coloring function throws', () => {
 			const colorMap = {
-				INVALID: () => { return; },
+				INVALID: () => {
+					return;
+				},
 			} as any;
 			expect(() => {
 				return new TextTransformer({
@@ -208,7 +212,9 @@ describe('TextTransformer', () => {
 
 			const complexMessage = {
 				featureEnabled: false,
-				fn: () => { return; },
+				fn: () => {
+					return;
+				},
 				list: ['1', '2', '3'],
 				nested: {
 					level: {
@@ -259,7 +265,6 @@ describe('TextTransformer', () => {
 
 			expect(transformer.format(logEntry)).toMatchSnapshot();
 		});
-
 	});
 
 	describe('formatTypes', () => {
@@ -279,7 +284,11 @@ describe('TextTransformer', () => {
 			}
 
 			const message = {
-				fns: [() => { return; }],
+				fns: [
+					() => {
+						return;
+					},
+				],
 				withName: withName,
 			};
 
@@ -294,10 +303,7 @@ describe('TextTransformer', () => {
 			(errorWithStack as any).stack = `Error: With stack
 at ... Mock stack trace`;
 			const message = {
-				errors: [
-					errorWithoutStack,
-					errorWithStack,
-				],
+				errors: [errorWithoutStack, errorWithStack],
 			};
 
 			expect(transformer.formatTypes(message)).toMatchSnapshot();

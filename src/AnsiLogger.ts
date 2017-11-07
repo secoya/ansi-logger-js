@@ -186,15 +186,9 @@ export class AnsiLogger<TTransformer extends Transformer<any>> {
 
 		// finally printing the output!.
 		if (matchMask(outputMask, Mask.ERROR)) {
-			this.options.transformer.printer.err.call(
-				this,
-				this.options.transformer.format(entry),
-			);
+			this.options.transformer.printer.err.call(this, this.options.transformer.format(entry));
 		} else {
-			this.options.transformer.printer.out.call(
-				this,
-				this.options.transformer.format(entry),
-			);
+			this.options.transformer.printer.out.call(this, this.options.transformer.format(entry));
 		}
 	}
 

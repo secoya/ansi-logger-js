@@ -2,7 +2,6 @@ import { resolveLogLevel, AnsiLogger, LogEntry, Mask } from '../AnsiLogger';
 import { IdentityTransformer } from '../IdentityTransformer';
 
 describe('IdentityTransformer', () => {
-
 	describe('printer', () => {
 		test('provided printer is used', () => {
 			const err = jest.fn();
