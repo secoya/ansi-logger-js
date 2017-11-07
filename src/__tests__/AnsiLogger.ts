@@ -295,6 +295,7 @@ describe('Logger', () => {
 			logLevel: Level.VERBOSE,
 			timeformat: mockTimeformat,
 			transformer: new TextTransformer({
+				forceColors: true,
 				printer: {
 					err: err,
 					out: out,

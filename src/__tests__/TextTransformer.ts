@@ -182,7 +182,7 @@ describe('TextTransformer', () => {
 		});
 
 		test('formatting errors without stack does not fail', () => {
-			const transformer = new TextTransformer();
+			const transformer = new TextTransformer({ forceColors: true });
 			const message = new Error('Error: no stack');
 			(message as any).stack = null;
 			const logEntry: LogEntry = {
@@ -203,6 +203,7 @@ describe('TextTransformer', () => {
 			const logger = new AnsiLogger({
 				timeformat: '0000-00-00 00:00:00.000+0000',
 				transformer: new TextTransformer({
+					forceColors: true,
 					printer: {
 						err: err,
 						out: out,
@@ -240,7 +241,7 @@ describe('TextTransformer', () => {
 		});
 
 		test('custom level text mask, will simply output get outputtet as is', () => {
-			const transformer = new TextTransformer();
+			const transformer = new TextTransformer({ forceColors: true });
 			const message = 'message';
 			const logEntry: LogEntry = {
 				group: 'text',
@@ -254,7 +255,7 @@ describe('TextTransformer', () => {
 		});
 
 		test('unknown numeric level mask, without custom level text, will output UNKNOWN', () => {
-			const transformer = new TextTransformer();
+			const transformer = new TextTransformer({ forceColors: true });
 			const message = 'message';
 			const logEntry: LogEntry = {
 				group: 'text',
@@ -296,7 +297,7 @@ describe('TextTransformer', () => {
 		});
 
 		test('formatting errors without stack without breaking', () => {
-			const transformer = new TextTransformer();
+			const transformer = new TextTransformer({ forceColors: true });
 			const errorWithoutStack = new Error('Without stack');
 			(errorWithoutStack as any).stack = null;
 			const errorWithStack = new Error('With stack');
