@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 'use strict';
 
-const __doc__ = `Usage: ansi-logger [-f FILE] [-l LEVEL | -m MASKS]
+const __doc__ = `Usage: ansi-logger [-t SECONDS] [-f FILE] [-l LEVEL | -m MASKS]
 
 Options:
-  -h --help            Show this help message.
-  -f --file FILE       The log file to parse and format [default: -].
-  -l --loglevel LEVEL  The level output [default: VERBOSE].
-  -m --logmasks MASKS  Comma separated list of log masks to output.
-  -s --split-pipes     Direct error entries to stderr.
+  -h --help             Show this help message.
+  -f --file FILE        The log file to parse and format [default: -].
+  -l --loglevel LEVEL   The level output [default: VERBOSE].
+  -m --logmasks MASKS   Comma separated list of log masks to output.
+  -s --split-pipes      Direct error entries to stderr.
+  -t --timeout SECONDS  The timeout for receiving data [default: 1]. 0 for disable.
 
 Levels available:
 SILENT ERROR WARN SUCCESS LOG INFO DEBUG VERBOSE
@@ -101,8 +102,6 @@ const masks = logMasks.split(',').reduce((carry, item) => {
 }, Level.SILENT);
 const logLevel = masks || Level[parseArg({ short: '-l', long: '--loglevel' }, 'VERBOSE')];
 
-const input = file === '-' ? process.stdin : fs.createReadStream(file);
-
 const transformer = new tt.TextTransformer({
 	forceColors: true,
 });
@@ -115,13 +114,7 @@ const startupTimer =
 				process.exit(1);
 			}, timeout * 1000);
 
-const rl = readline.createInterface({
-	input: input,
-	output: process.stdout,
-	terminal: false,
-});
-
-rl.on('line', line => {
+function readLine(line) {
 	if (line == null || line.trim() == '') {
 		return;
 	}
@@ -142,7 +135,7 @@ rl.on('line', line => {
 		process.stderr.write(e.stack);
 		process.exit(1);
 	}
-});
+}
 
 // When piping output to another process e.g. less
 // then quitting the process can end up closing the pipe
@@ -157,8 +150,15 @@ function rethrowNonEPIPE(err) {
 process.stdout.on('error', rethrowNonEPIPE);
 process.stderr.on('error', rethrowNonEPIPE);
 
+const input = file === '-' ? process.stdin : fs.createReadStream(file);
+const rl = readline.createInterface({ input: input, output: process.stdout, terminal: false });
+rl.on('line', readLine);
 rl.on('end', () => {
+	rl.close();
 	process.exit(0);
 });
-
+rl.on('error', () => {
+	rl.close();
+	process.exit(0);
+});
 rl.resume();
