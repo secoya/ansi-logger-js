@@ -8,9 +8,10 @@ ansi-logger \- format JSON entries to colored output.
 
 .SH SYNOPSIS
 .B ansi-logger
-[\fB\-f\fR \fIFILE\fR]
-[\fB\-l\fR \fILEVEL\fR | \fB-m\fR \fIMASKS\fR]
 [\fB\-s\fR]
+[\fB\-l\fR \fILEVEL\fR | \fB-m\fR \fIMASKS\fR]
+[\fB\-t\fR \fISECONDS\fR]
+[\fB\-f\fR \fIFILE\fR]
 
 .SH DESCRIPTION
 .RE
@@ -40,6 +41,10 @@ Comma separated list of log masks to output.
 .TP
 .BR \-s ", " \-\-split-pipes
 Direct error entries to stderr.
+
+.TP
+.BR \-t ", " \-\-timeout =\fISECONDS\fR
+The timeout for receiving data [default: 1]. 0 for disable.
 
 .SH LEVEL OPTIONS
 .TP
