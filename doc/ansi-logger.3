@@ -1,0 +1,363 @@
+.\" Manpage for ansi-logger library.
+.\" Contact briankchristensen@gmail.com to correct errors or typos.
+
+.TH man 3 "08 Nov 2017" "3.1.5" "ansi-logger(3) man page"
+
+.SH NAME
+ansi-logger \- javascript logging library.
+
+.SH SYNOPSYS
+
+.TP
+.B createTextLogger(\fIoptions\fR?:\ \fBPartial<Options>)\fR:\ \fIAnsiLogger<TextTransformer>
+.RS 7
+Create a simple text logger, generally used to output human readable
+format to the console.
+.RE
+
+.TP
+.BR createJSONLogger(\fIoptions\fR?:\ \fBPartial<Options>)\fR:\ \fIAnsiLogger<JSONTransformer>
+.RS 7
+Create simple JSON logger, generally used for when outputting
+to log services like e.g. Log Stash.
+.RE
+
+.TP
+.B createLoggerFromEnvironment(\fIoptions\fR?:\ \fBPartial<Options>)\fR:\ \fIAnsiLogger<Transformer<string>>
+.RS 7
+Create logger based on the options passed, but let environment variables overwrite the options if they are defeined.
+.br
+Default is JSON logger with log level INFO.
+.LP
+The environment variables are:
+.br
+- \fBLOGLEVEL\fR   possible values are:
+.br
+.RS 13
+\fISILENT\fR | \fIERROR\fR | \fIWARN\fR | \fISUCCESS\fR | \fILOG\fR | \fIINFO\fR | \fIDEBUG\fR | \fIVERBOSE\fR | \fInumber\fR
+.RE
+.br
+- \fBLOGFORMAT\fR  possible values are:
+.br
+.RS 13
+\fITEXT\fR | \fIJSON\fR
+.RE
+.RE
+
+.TP
+.BR AnsiLogger<\fIE\fB>(\fIoptions\fR:\ \fBPartial<Options>)
+Set options changes the internal setting of the logger and the behavior will change after this call.
+.br
+If you change the log levels to output the new mask of log levels is outputted to the INFO level,
+.br
+so if INFO level isn't in the new log level mask, nothing will be outputted.
+.RS 7
+.TP
+.BR error<\fIL\fB>(\fImsg\fR:\ \fIL\fB,\ ...rest:\ any[])\fR:\ \fIL
+Print message(s) to error log level if enabled.
+
+.TP
+.BR log<\fIL\fB>(\fImsg\fR:\ \fIL\fB,\ ...rest:\ any[])\fR:\ \fIL
+Print messeage(s) to default log level if enabled.
+
+.TP
+.BR success<\fIL\fB>(\fImsg\fR:\ \fIL\fB,\ ...rest:\ any[])\fR:\ \fIL
+Print a success formatted message.
+
+.TP
+.BR warn<\fIL\fB>(\fImsg\fR:\ \fIL\fB,\ ...rest:\ any[])\fR:\ \fIL
+Print a warning formatted message.
+
+.TP
+.BR debug<\fIL\fB>(\fImsg\fR:\ \fIL\fB,\ ...rest:\ any[])\fR:\ \fIL
+Print message(s) to debug log level if enabled.
+
+.TP
+.BR verbose<\fIL\fB>(\fImsg\fR:\ \fIL\fB,\ ...rest:\ any[])\fR:\ \fIL
+Print a verbose formatted message.
+
+.TP
+.BR formatTypes<\fIL\fB>(\fImsg\fR:\ \fIL\fB)\fR:\ \fIL
+Text transform Format types to string, some types make resively calls.
+
+.TP
+.BR formatError(\fIerr\fR:\ \fBError)\fR:\ \fIvoid
+Format an error. This is typically used, for text transforming Exception(s)/Error(s).
+.RE
+
+.TP
+.BR JSONTransformer(\fIoptions\fR:\ \fBPartial<Options>)
+Transform log entries JSON encoded string output.
+
+.RS 7
+
+.TP
+.BR format(\fIentry\fR:\ \fBLogEntry)\fR:\ \fIstring
+Format log entries to json strings.
+
+.TP
+.BR formatTypes<\fIT\fB>(\fIinputType\fR:\ \fIT\fB)\fR:\ \fIT
+Don't "format" complex types, just pass them along,
+.br
+and let the formatting happen in the `format` method.
+.TP
+.BR printer.err(\fImsg\fR:\ \fBstring)\fR:\ \fIvoid
+Print transformed error log entries to output stream.
+
+.TP
+.BR printer.out(\fImsg\fR:\ \fBstring)\fR:\ \fIvoid
+Print transformed log entries to output stream.
+
+.RE
+
+.TP
+.BR TextTransformer(\fIoptions\fR:\ \fBPartial<Options>)
+Transformer from log entries to human readable colorized text.
+
+.RS 7
+
+.TP
+.BR format(\fIentry\fR:\ \fBLogEntry):\ \fIstring
+Transform log entry to text output.
+
+.TP
+.BR formatTypes<\fIT\fB>(\fIinputType\fR:\ \fIT\fB)\fR:\ \fIT
+Format complex types.
+
+.TP
+.BR printer.err(\fImsg\fR:\ \fBstring):\ \fIvoid
+Print transformed error log entries to output stream.
+
+.TP
+.BR printer.out(\fImsg\fR:\ \fBstring):\ \fIvoid
+Print transformed log entries to output stream.
+
+.RE
+.TP
+.BR IdentityTransformer(\fIoptions\fR:\ \fBPartial<Options>)
+The identity transformer makes no transformation to the log entry
+.br
+and just returns the `LogEntry` as is.
+
+.RS 7
+
+.TP
+.BR format(\fIentry\fR:\ \fBLogEntry):\ \fIstring
+Format log entry according to identity rules.
+
+.TP
+.BR formatTypes<\fIT\fB>(\fIinputType\fR:\ \fIT\fB)\fR:\ \fIT
+Return the complex type identity.
+
+.TP
+.BR printer.err(\fImsg\fR:\ \fBLogEntry)\fR:\ \fIvoid
+Print transformed error log entries to output stream.
+
+.TP
+.BR printer.out(\fImsg\fR:\ \fBLogEntry)\fR:\ \fIvoid
+Print transformed log entries to output stream.
+
+.RE
+
+.SH OPTIONS
+
+.SS createTextLogger
+
+.TP
+.BR \fIgroup\fR:\ string
+The group to mark the log entries with.
+
+.TP
+.BR \fIgroupColor\fR:\ (str:\ string)\ =>\ string
+The color to show the group in.
+
+.TP
+.BR \fIlogLevel\fR:\ number
+The log level mask.
+
+.SS createJSONLogger
+
+.TP
+.BR \fIgroup\fR:\ string
+The group to mark the log entries with.
+
+.TP
+.BR \fIlogLevel\fR:\ number
+The log level mask.
+
+.SS createLoggerFromEnvironment
+
+.TP
+.BR \fIgroup\fR:\ string
+The group to mark the log entries with.
+
+.TP
+.BR \fIgroupColor\fR:\ (str:\ string)\ =>\ string
+The color to show the group in.
+
+.TP
+.BR \fIlogFormat\fR:\ 'TEXT'\ |\ 'JSON'
+The format to use if \fBLOGFORMAT\fR is not defined.
+
+.TP
+.BR \fIlogLevel\fR:\ number
+The log level mask.
+
+.SS AnsiLogger
+
+.TP
+.BR \fIgroup\fR:\ string
+The group to mark the log entries with.
+
+.TP
+.BR \fIlogLevel\fR:\ number
+The log level mask.
+
+.TP
+.BR \fItimeformat\fR:\ string
+Moment.js formats.
+
+.TP
+.BR \fItransformer\fR:\ Transformer
+The transformer to convert LogEntry types to what the outputters can print.
+
+.SS JSONTranformer
+
+.TP
+.BR \fIprinter.err\fR:\ (msg:\ string)\ =>\ void
+Print transformed error log entries to output stream.
+
+.TP
+.BR \fIprinter.out\fR:\ (msg:\ string)\ =>\ void
+Print transformed log entries to output stream.
+
+.SS TextTranformer
+
+.TP
+.BR \fIcolorMap\fR:\ Partial<ColorMap>
+The map of which coloring functions to use when/where.
+
+.TP
+.BR \fIcolors\fR:\ boolean
+Whether or not if colors is enabled, default: process.stdout.isTTY.
+
+.TP
+.BR \fIforceColors\fR:\ boolean
+Always output colors, no matter if stdout is a TTY.
+
+.TP
+.BR \fIprinter.err\fR:\ (msg:\ string)\ =>\ void
+Print transformed error log entries to output stream.
+
+.TP
+.BR \fIprinter.out\fR:\ (msg:\ string)\ =>\ void
+Print transformed log entries to output stream.
+
+.SS IdentityTransformer
+
+.TP
+.BR \fIprinter.err\fR:\ (msg:\ string)\ =>\ void
+Print transformed error log entries to output stream.
+
+.TP
+.BR \fIprinter.out\fR:\ (msg:\ string)\ =>\ void
+Print transformed log entries to output stream.
+
+.SS Mask
+The numeric level for marking the log entries.
+
+.TP
+.BR \fIERROR\fR\ \ \ \ (1)
+The mask for error log entries.
+
+.TP
+.BR \fIWARN\fR\ \ \ \ \ (2)
+The mask for warning log entries.
+
+.TP
+.BR \fISUCCESS\fR\ \ (4)
+The mask for success log entries.
+
+.TP
+.BR \fILOG\fR\ \ \ \ \ \ (8)
+The mask for default log entries.
+
+.TP
+.BR \fIINFO\fR\ \ \ \ (16)
+The mask for info log entries.
+
+.TP
+.BR \fIDEBUG\fR\ \ \ (32)
+The mask for debug log entries.
+
+.TP
+.BR \fIVERBOSE\fR\ (64)
+The mask for verbose log entries.
+
+.SS Level
+The numeric level for marking the log entries.
+
+.TP
+.BR \fISILENT\fR\ \ \ \ (0)
+This log level won't output anything.
+
+.TP
+.BR \fIERROR\fR\ \ \ \ \ (1)
+This log level only outputs error log entries.
+
+.TP
+.BR \fIWARN\fR\ \ \ \ \ \ (3)
+This log level outputs both warning and error log entries.
+
+.TP
+.BR \fISUCCESS\fR\ \ \ (7)
+This log level outputs all both inclusive the success log entries.
+
+.TP
+.BR \fILOG\fR\ \ \ \ \ \ (15)
+This log level outputs all both inclusive the default log entries.
+
+.TP
+.BR \fIINFO\fR\ \ \ \ \ (31)
+This log level outputs all both inclusive the info log entries.
+
+.TP
+.BR \fIDEBUG\fR\ \ \ \ (63)
+This log level outputs all both inclusive the debug log entries.
+
+.TP
+.BR \fIVERBOSE\fR\ (127)
+This log level outputs everything.
+
+.SS ColorMap
+
+\fIERROR\fR:\ \ \ (str:\ string)\ =>\ string
+.br
+\fIWARN\fR:\ \ \ \ (str:\ string)\ =>\ string
+.br
+\fISUCCESS\fR:\ (str:\ string)\ =>\ string
+.br
+\fILOG\fR:\ \ \ \ \ (str:\ string)\ =>\ string
+.br
+\fIINFO\fR:\ \ \ \ (str:\ string)\ =>\ string
+.br
+\fIDEBUG\fR:\ \ \ (str:\ string)\ =>\ string
+.br
+\fIVERBOSE\fR:\ (str:\ string)\ =>\ string
+.br
+\fITIME\fR:\ \ \ \ (str:\ string)\ =>\ string
+.br
+\fIGROUP\fR:\ \ \ (str:\ string)\ =>\ string
+
+.SH ENVIRONMENT
+\fBLOGFORMAT\fR
+\fBLOGLEVEL\fR
+
+.SH SEE ALSO
+\fBansi-logger\fR(1)
+
+.SH BUGS
+Report bugs at https://github.com/secoya/ansi-logger-js/issues
+
+.SH AUTHOR
+Brian K. Christensen <briankchritensen@gmail.com>

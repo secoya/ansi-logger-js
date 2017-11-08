@@ -76,7 +76,7 @@ function resolveLogLevel(levelOrMask?: number | keyof typeof Level): Level {
  * but let environment variables overwrite the options
  * if they are defeined.
  *
- * Default is TEXT logger with log level INFO.
+ * Default is JSON logger with log level INFO.
  *
  * The environment variables are:
  * - LOGLEVEL   possible values are: SILENT | ERROR | WARN | SUCCESS | LOG | INFO | DEBUG | VERBOSE | number
