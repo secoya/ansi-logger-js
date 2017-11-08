@@ -157,8 +157,4 @@ rl.on('end', () => {
 	rl.close();
 	process.exit(0);
 });
-rl.on('error', () => {
-	rl.close();
-	process.exit(0);
-});
 rl.resume();
