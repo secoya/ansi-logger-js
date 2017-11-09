@@ -37,7 +37,10 @@
 	],
 	"license": "BSD-3-Clause",
 	"main": "lib/index.js",
-	"man": "./doc/ansi-logger.1",
+	"man": [
+		"./doc/ansi-logger.1",
+		"./doc/ansi-logger.3"
+	],
 	"name": "ansi-logger",
 	"optionalDependencies": {
 		"@types/cli-color": "^0.3.29",
