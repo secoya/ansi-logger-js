@@ -11,10 +11,12 @@
 /.gitignore
 /.npmignore
 /.prettierrc
+/.prettierignore
 
 /Dockerfile*
 
 /jest.config.json
 /tsconfig.build.json
+/tsconfig.build-cli.json
 /tsconfig.test.json
 /tslint.json
