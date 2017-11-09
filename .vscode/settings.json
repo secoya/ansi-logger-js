@@ -3,11 +3,5 @@
         "files.insertFinalNewline": false,
         "files.trimTrailingWhitespace": false
     },
-    "jest.pathToConfig": "./jest.config.json",
-    "prettier.printWidth": 120,
-    "prettier.semi": true,
-    "prettier.singleQuote": true,
-    "prettier.tabWidth": 4,
-    "prettier.trailingComma": "all",
-    "prettier.useTabs": true
+    "jest.pathToConfig": "./jest.config.json"
 }
