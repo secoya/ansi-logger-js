@@ -1,0 +1,18 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./bin",
+        "rootDir": "./src",
+        "declaration": false,
+        "declarationDir": null
+    },
+    "files": [
+        "./src/cli.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/__tests__/*",
+        "**/__mocks__/*",
+        "./src/*.ts"
+    ]
+}

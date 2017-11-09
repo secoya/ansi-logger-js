@@ -12,6 +12,7 @@ ansi-logger \- format JSON entries to colored output.
 [\fB\-l\fR \fILEVEL\fR | \fB-m\fR \fIMASKS\fR]
 [\fB\-t\fR \fISECONDS\fR]
 [\fB\-f\fR \fIFILE\fR]
+[\fB\-\-mapper\fR \fIFILE_OR_STRING\fR]
 
 .SH DESCRIPTION
 .RE
@@ -45,6 +46,46 @@ Direct error entries to stderr.
 .TP
 .BR \-t ", " \-\-timeout =\fISECONDS\fR
 The timeout for receiving data [default: 1]. 0 for disable.
+
+.TP
+.BR \-\-mapper =\fIFILE_OR_STRING\fR
+JavaScript file that exports a single function to map parsed JSON structure to LogEntry
+.br
+or a comma separated mapper pairs, e.g \fIlevelText\fR=\fBlevel\fR,\fIgroup\fR=\fBkey\fR
+.br
+.LP
+.RS 7
+
+Input:
+.br
+{"timestamp": "2017-11-08 10:19:01+01:00", "level": "info", "import_key": "references", "glob": "*.xml", "message": "Importing files"}
+
+// mapper.js
+.br
+module.exports = entry => {
+    let levelText;
+    switch (entry.level) {
+        case 'fatal':
+            levelText = 'ERROR';
+            break;
+        default:
+            levelText = typeof entry.level === 'string' ? entry.level.toUpperCase() : 'LOG';
+    }
+
+    return {
+        group: entry.import_key,
+        levelText: levelText,
+        message: entry.message,
+        timestamp: entry.timestamp,
+    };
+.br
+};
+
+Output:
+.br
+[2017-11-08 10:19:01+01:00] [references] [INFO] Importing files
+
+.RE
 
 .SH LEVEL OPTIONS
 .TP
@@ -117,6 +158,10 @@ Redirect file to stdin
 .TP
 Use file switch to read a log file
 \fBansi-logger\fR \fB\-f\fR \fI./big.log\fR | less
+
+.TP
+Use grep combined with \fBtail -f\fR
+\fBtail -f\fR ./big.log | grep \fI--line-buffered\fR 'UserID: 4' | \fBansi-logger\fR -t10 -mWARN,DEBUG
 
 .SH SEE ALSO
 \fBansi-logger\fR(3)
