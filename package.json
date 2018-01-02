@@ -13,18 +13,18 @@
 	],
 	"dependencies": {
 		"cli-color": "1.2.0",
-		"moment": "2.19.1",
-		"tslib": "1.8.0"
+		"moment": "2.20.1",
+		"tslib": "1.8.1"
 	},
 	"description": "Console logger with support for colors and log levels, it complies to the default console.log interface, with methods like log,error,warn,debug and extended with some extra levels for nice formatting purposes.",
 	"devDependencies": {
-		"@types/jest": "21.1.5",
-		"jest": "21.2.1",
-		"prettier": "1.8.2",
-		"ts-jest": "21.2.1",
+		"@types/jest": "22.0.0",
+		"jest": "22.0.4",
+		"prettier": "1.9.2",
+		"ts-jest": "22.0.0",
 		"tslint": "5.8.0",
 		"tslint-secoya": "1.0.6",
-		"typescript": "2.6.1"
+		"typescript": "2.6.2"
 	},
 	"engines": {
 		"node": ">=4.8.4"
