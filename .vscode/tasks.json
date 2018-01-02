@@ -9,6 +9,13 @@
             "problemMatcher": [
                 "$tsc"
             ]
+        },
+        {
+            "type": "npm",
+            "script": "build-cli",
+            "problemMatcher": [
+                "$tsc"
+            ]
         }
     ]
 }
