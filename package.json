@@ -13,21 +13,21 @@
 	],
 	"dependencies": {
 		"cli-color": "1.2.0",
-		"moment": "2.20.1",
-		"tslib": "1.8.1"
+		"moment": "2.22.1",
+		"tslib": "1.9.0"
 	},
 	"description": "Console logger with support for colors and log levels, it complies to the default console.log interface, with methods like log,error,warn,debug and extended with some extra levels for nice formatting purposes.",
 	"devDependencies": {
-		"@types/jest": "22.0.0",
-		"jest": "22.0.4",
-		"prettier": "1.9.2",
-		"ts-jest": "22.0.0",
-		"tslint": "5.8.0",
+		"@types/jest": "22.2.3",
+		"jest": "22.4.3",
+		"prettier": "1.12.1",
+		"ts-jest": "22.4.4",
+		"tslint": "5.9.1",
 		"tslint-secoya": "1.0.6",
-		"typescript": "2.6.2"
+		"typescript": "2.8.3"
 	},
 	"engines": {
-		"node": ">=4.8.4"
+		"node": ">=8.11.1"
 	},
 	"keywords": [
 		"log",
@@ -44,7 +44,7 @@
 	"name": "ansi-logger",
 	"optionalDependencies": {
 		"@types/cli-color": "^0.3.29",
-		"@types/node": "^8.0.34"
+		"@types/node": ">=8.10.10"
 	},
 	"repository": "https://github.com/secoya/ansi-logger-js",
 	"scripts": {
@@ -53,12 +53,12 @@
 		"clean": "rm -Rf lib/ types/*.d.ts",
 		"clean-cli": "rm -Rf bin/",
 		"fmt": "prettier --write -l 'src/**/*.ts'",
-		"lint": "tslint src/",
+		"lint": "tslint --project .",
 		"test": "jest --config jest.config.json",
 		"postbuild-cli": "chmod +x bin/cli.js",
 		"prebuild": "npm run clean",
 		"prepublishOnly": "npm test && npm run lint && npm run build && npm run build-cli"
 	},
 	"types": "types/index.d.ts",
-	"version": "3.2.0"
+	"version": "4.0.0"
 }

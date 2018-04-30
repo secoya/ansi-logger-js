@@ -151,7 +151,7 @@ const startupTimer =
 		: setTimeout(() => {
 				process.stderr.write('No data received from stdin');
 				process.exit(1);
-			}, timeout * 1000);
+		  }, timeout * 1000);
 
 function tryMapFromLevelText(entry: any, levelText: string | null) {
 	if (levelText == null) {

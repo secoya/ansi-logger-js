@@ -29,7 +29,7 @@ export function createTextLogger(options?: {
 						colorMap: {
 							GROUP: opts.groupColor,
 						},
-					},
+				  },
 		),
 	});
 }
@@ -108,9 +108,9 @@ export function createLoggerFromEnvironment(options?: {
 				group: opts.group,
 				groupColor: opts.groupColor,
 				logLevel: loggerOptions.logLevel,
-			})
+		  })
 		: createJSONLogger({
 				group: opts.group,
 				logLevel: loggerOptions.logLevel,
-			});
+		  });
 }
