@@ -20,7 +20,7 @@ const getSimpleLogger = (logLevel?: number, err?: any, out?: any) => {
 };
 
 class MockError extends Error {
-	public stack: string;
+	public stack: string = '';
 	public constructor(msg?: string) {
 		super(msg);
 		Object.setPrototypeOf(this, MockError.prototype);
