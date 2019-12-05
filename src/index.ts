@@ -14,6 +14,8 @@ import { TextTransformer } from './TextTransformer';
  * format to the console.
  */
 export function createTextLogger(options?: {
+	colors?: boolean;
+	forceColors?: boolean;
 	group?: string;
 	groupColor?: Format;
 	logLevel?: number;
@@ -29,6 +31,8 @@ export function createTextLogger(options?: {
 						colorMap: {
 							GROUP: opts.groupColor,
 						},
+						colors: opts.colors,
+						forceColors: opts.forceColors,
 				  },
 		),
 	});
@@ -83,6 +87,8 @@ function resolveLogLevel(levelOrMask?: number | keyof typeof Level): Level {
  * - LOGFORMAT  possible values are: TEXT | JSON
  */
 export function createLoggerFromEnvironment(options?: {
+	colors?: boolean;
+	forceColors?: boolean;
 	group?: string;
 	groupColor?: Format;
 	logFormat?: 'TEXT' | 'JSON';
@@ -96,8 +102,21 @@ export function createLoggerFromEnvironment(options?: {
 	const envLogFormat =
 		['TEXT', 'JSON'].indexOf(process.env.LOGFORMAT as string) !== -1 ? process.env.LOGFORMAT : null;
 
+	const envColors = process.env.CLICOLOR;
+	const envForceColors = process.env.CLICOLOR_FORCE;
+
 	const logLevel = envLogLevel == null ? opts.logLevel : resolveLogLevel(envLogLevel as number | keyof typeof Level);
 	const logFormat = envLogFormat == null ? opts.logFormat : envLogFormat;
+
+	const colors = envColors == null ? (opts.colors == null ? true : opts.colors) : envColors === '0' ? false : true;
+	const forceColors =
+		envForceColors == null
+			? opts.forceColors == null
+				? false
+				: opts.forceColors
+			: envForceColors === '1'
+			? true
+			: false;
 
 	if (logLevel != null) {
 		loggerOptions.logLevel = logLevel;
@@ -105,6 +124,8 @@ export function createLoggerFromEnvironment(options?: {
 
 	return logFormat === 'TEXT'
 		? createTextLogger({
+				colors: colors,
+				forceColors: forceColors,
 				group: opts.group,
 				groupColor: opts.groupColor,
 				logLevel: loggerOptions.logLevel,

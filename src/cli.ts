@@ -142,7 +142,8 @@ const mapFn =
 			: stringMapper(mapper);
 
 const transformer = new TextTransformer({
-	forceColors: true,
+	colors: process.env.CLICOLOR === '0' ? false : true,
+	forceColors: process.env.CLICOLOR_FORCE === '1' ? true : false,
 });
 
 const startupTimer =

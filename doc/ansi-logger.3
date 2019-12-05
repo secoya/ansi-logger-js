@@ -28,20 +28,34 @@ to log services like e.g. Log Stash.
 Create logger based on the options passed, but let environment variables overwrite the options if they are defeined.
 .br
 Default is JSON logger with log level INFO.
+.br
+When using TEXT logger the default is to output colors when writing to a TTY.
 .LP
 The environment variables are:
 .br
-- \fBLOGLEVEL\fR   possible values are:
+- \fBCLICOLOR\fR
 .br
-.RS 13
+.RS 19
+\fI1\fR | \fI0\fR
+.RE
+.br
+- \fBCLICOLOR_FORCE\fR
+.br
+.RS 19
+\fI1\fR | \fI0\fR
+.RE
+.br
+- \fBLOGFORMAT\fR
+.br
+.RS 19
+\fITEXT\fR | \fIJSON\fR
+.RE
+- \fBLOGLEVEL\fR
+.br
+.RS 19
 \fISILENT\fR | \fIERROR\fR | \fIWARN\fR | \fISUCCESS\fR | \fILOG\fR | \fIINFO\fR | \fIDEBUG\fR | \fIVERBOSE\fR | \fInumber\fR
 .RE
 .br
-- \fBLOGFORMAT\fR  possible values are:
-.br
-.RS 13
-\fITEXT\fR | \fIJSON\fR
-.RE
 .RE
 
 .TP
@@ -162,6 +176,14 @@ Print transformed log entries to output stream.
 .SH OPTIONS
 
 .SS createTextLogger
+
+.TP
+.BR \fIcolors\fR:\ boolean
+Whether or not to output ansi color escape sequences if outputting to a TTY.
+
+.TP
+.BR \fIforceColors\fR:\ boolean
+Whether or not to always output ansi color escape sequences.
 
 .TP
 .BR \fIgroup\fR:\ string
@@ -350,6 +372,8 @@ This log level outputs everything.
 \fIGROUP\fR:\ \ \ (str:\ string)\ =>\ string
 
 .SH ENVIRONMENT
+\fBCLICOLOR\fR
+\fBCLICOLOR_FORCE\fR
 \fBLOGFORMAT\fR
 \fBLOGLEVEL\fR
 

@@ -65,7 +65,7 @@ describe('TextTransformer', () => {
 			const err = jest.fn();
 			const out = jest.fn();
 
-			process.stdout.isTTY = undefined;
+			process.stdout.isTTY = false;
 			const transformer = new TextTransformer({
 				colors: true,
 				printer: {
@@ -100,7 +100,7 @@ describe('TextTransformer', () => {
 			const err = jest.fn();
 			const out = jest.fn();
 
-			process.stdout.isTTY = undefined;
+			process.stdout.isTTY = false;
 			const transformer = new TextTransformer({
 				colors: false,
 				forceColors: true,
