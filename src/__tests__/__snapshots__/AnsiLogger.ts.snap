@@ -12,7 +12,7 @@ Array [
 
 exports[`Logger json complex types output 1`] = `
 Array [
-  "{\\"group\\":\\"json\\",\\"levelNumeric\\":32,\\"levelText\\":\\"DEBUG\\",\\"message\\":{\\"host\\":\\"localhost\\",\\"name\\":\\"test\\",\\"pass\\":\\"test\\",\\"user\\":\\"test\\"},\\"timestamp\\":\\"0000-00-00 00:00:00\\"}
+  "{\\"group\\":\\"json\\",\\"levelNumeric\\":32,\\"levelText\\":\\"DEBUG\\",\\"message\\":\\"{ host: 'localhost', name: 'test', pass: 'test', user: 'test' }\\",\\"timestamp\\":\\"0000-00-00 00:00:00\\"}
 ",
 ]
 `;

@@ -1,3 +1,4 @@
+import { inspect } from 'util';
 import { LogEntry, Transformer } from './AnsiLogger';
 
 /**
@@ -26,7 +27,16 @@ export class JSONTransformer implements Transformer<string> {
 	 * Format log entries to json strings.
 	 */
 	public format(entry: LogEntry): string {
-		return JSON.stringify(entry) + '\n';
+		if (typeof entry.message === 'string') {
+			return JSON.stringify(entry) + '\n';
+		} else {
+			return (
+				JSON.stringify({
+					...entry,
+					message: inspect(entry.message),
+				}) + '\n'
+			);
+		}
 	}
 
 	/**

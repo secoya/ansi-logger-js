@@ -96,4 +96,23 @@ describe('JSONTransformer', () => {
 			expect(transformer.formatTypes(complexMessage)).toBe(complexMessage);
 		});
 	});
+
+	describe('regressions', () => {
+		test('format errors wont result in empty object', () => {
+			const error = new Error('Something horrible happend');
+			const transformer = new JSONTransformer();
+			expect(
+				transformer.format({
+					group: 'json',
+					levelNumeric: Mask.INFO,
+					levelText: resolveLogLevel(Mask.ERROR),
+					timestamp: 'NOW',
+					// tslint:disable-next-line: object-literal-sort-keys
+					message: error,
+				}),
+			).toContain(
+				`{"group":"json","levelNumeric":16,"levelText":"ERROR","timestamp":"NOW","message":"Error: Something horrible happend\\n    at Object.<anonymous> (`,
+			);
+		});
+	});
 });
