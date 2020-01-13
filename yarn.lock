@@ -286,6 +286,11 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
+"@secoya/typescript-scope-analysis@1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@secoya/typescript-scope-analysis/-/typescript-scope-analysis-1.0.3.tgz#3e49f6ad2e770db223d2dba825fde5fe48b14916"
+  integrity sha512-HVy6Yd362gFwEK3TV59XdTPkmFl9rH2+XZGbRiYKyqCrUD7kiXj7doZ6UVeXHq7+2va8QFFHPa0GDeTadSPYZQ==
+
 "@types/babel__core@^7.1.0":
   version "7.1.3"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.3.tgz#e441ea7df63cd080dfcd02ab199e6d16a735fc30"
@@ -344,10 +349,10 @@
     "@types/istanbul-lib-coverage" "*"
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@24.0.23":
-  version "24.0.23"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-24.0.23.tgz#046f8e2ade026fe831623e361a36b6fb9a4463e4"
-  integrity sha512-L7MBvwfNpe7yVPTXLn32df/EK+AMBFAFvZrRuArGs7npEWnlziUXK+5GMIUTI4NIuwok3XibsjXCs5HxviYXjg==
+"@types/jest@24.0.25":
+  version "24.0.25"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-24.0.25.tgz#2aba377824ce040114aa906ad2cac2c85351360f"
+  integrity sha512-hnP1WpjN4KbGEK4dLayul6lgtys6FPz0UfxMeMQCv0M+sTnzN3ConfiO72jHgLxl119guHgI8gLqDOrRLsyp2g==
   dependencies:
     jest-diff "^24.3.0"
 
@@ -3482,10 +3487,10 @@ tr46@^1.0.1:
   dependencies:
     punycode "^2.1.0"
 
-ts-jest@24.2.0:
-  version "24.2.0"
-  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-24.2.0.tgz#7abca28c2b4b0a1fdd715cd667d65d047ea4e768"
-  integrity sha512-Yc+HLyldlIC9iIK8xEN7tV960Or56N49MDP7hubCZUeI7EbIOTsas6rXCMB4kQjLACJ7eDOF4xWEO5qumpKsag==
+ts-jest@24.3.0:
+  version "24.3.0"
+  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-24.3.0.tgz#b97814e3eab359ea840a1ac112deae68aa440869"
+  integrity sha512-Hb94C/+QRIgjVZlJyiWwouYUF+siNJHJHknyspaOcZ+OQAIdFG/UrdQVXw/0B8Z3No34xkUXZJpOTy9alOWdVQ==
   dependencies:
     bs-logger "0.x"
     buffer-from "1.x"
@@ -3510,6 +3515,11 @@ tslint-microsoft-contrib@5.2.1:
   dependencies:
     tsutils "^2.27.2 <2.29.0"
 
+tslint-react-hooks@2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/tslint-react-hooks/-/tslint-react-hooks-2.2.1.tgz#c52c7df65ee1517b2d6c92bc716e9ef72ccdf208"
+  integrity sha512-bqIg2uZe+quJMfSOGc4OOZ4awo6TP1ejGDGS6IKg2WIrS0XnWfhUJ99i3B8rUpnZhuD4vRSvyYIbXPUmEqQxxQ==
+
 tslint-react@3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/tslint-react/-/tslint-react-3.6.0.tgz#7f462c95c4a0afaae82507f06517ff02942196a1"
@@ -3517,13 +3527,15 @@ tslint-react@3.6.0:
   dependencies:
     tsutils "^2.13.1"
 
-tslint-secoya@2.0.7:
-  version "2.0.7"
-  resolved "https://registry.yarnpkg.com/tslint-secoya/-/tslint-secoya-2.0.7.tgz#bd148ff7abd7f8362f8005fbce934c3394c200e6"
-  integrity sha512-qXw36X4CDIBHtzugux4kF6a0snnKKrYxSkfph1DFx6PasAwOf0Ui2ch1Hdkz4Wy0a2Mtz82vXTz3753AQHYA0Q==
+tslint-secoya@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/tslint-secoya/-/tslint-secoya-2.1.3.tgz#a64c81c67d50d02ae69dd214e4f19d1d851f2f27"
+  integrity sha512-IYcm2cg8MjeShu2MptSTS1rS/mBzHeUkLq+Ydt9RjvfLqMHkvfUD1uYmCe6xor7WrKb1oGfC4HEp5tcmDHZsnA==
   dependencies:
+    "@secoya/typescript-scope-analysis" "1.0.3"
     tslint-microsoft-contrib "5.2.1"
     tslint-react "3.6.0"
+    tslint-react-hooks "2.2.1"
 
 tslint@5.20.1:
   version "5.20.1"
@@ -3587,10 +3599,10 @@ type@^2.0.0:
   resolved "https://registry.yarnpkg.com/type/-/type-2.0.0.tgz#5f16ff6ef2eb44f260494dae271033b29c09a9c3"
   integrity sha512-KBt58xCHry4Cejnc2ISQAF7QY+ORngsWfxezO68+12hKV6lQY8P/psIkcbjeHWn7MqcgciWJyCCevFMJdIXpow==
 
-typescript@3.7.3:
-  version "3.7.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.3.tgz#b36840668a16458a7025b9eabfad11b66ab85c69"
-  integrity sha512-Mcr/Qk7hXqFBXMN7p7Lusj1ktCBydylfQM/FZCk5glCNQJrCUKPkMHdo9R0MTFWsC/4kPFvDS0fDPvukfCkFsw==
+typescript@3.7.4:
+  version "3.7.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.4.tgz#1743a5ec5fef6a1fa9f3e4708e33c81c73876c19"
+  integrity sha512-A25xv5XCtarLwXpcDNZzCGvW2D1S3/bACratYBx2sax8PefsFhlYmkQicKHvpYflFS8if4zne5zT5kpJ7pzuvw==
 
 uglify-js@^3.1.4:
   version "3.7.1"
