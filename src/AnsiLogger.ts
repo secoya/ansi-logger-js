@@ -211,7 +211,7 @@ export class AnsiLogger<TTransformer extends Transformer<any>> {
 	 */
 	public error<E>(firstArg: E, ...__: any[]): E {
 		for (const msg of Array.from(arguments)) {
-			if (msg instanceof Error || (typeof msg === 'object' && 'stack' in msg)) {
+			if (msg instanceof Error || (typeof msg === 'object' && msg != null && 'stack' in msg)) {
 				this.formatError(msg);
 			} else if (typeof msg === 'string') {
 				this.print(msg, Mask.ERROR);

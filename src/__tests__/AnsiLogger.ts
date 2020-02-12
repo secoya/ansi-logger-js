@@ -371,6 +371,11 @@ describe('Logger', () => {
 			});
 			expect(logger.formatError).toHaveBeenCalled();
 		});
+		test('passing null does not throw', () => {
+			const logger = getSimpleLogger();
+			const message = null;
+			expect(() => logger.error(message)).not.toThrow();
+		});
 	});
 });
 
