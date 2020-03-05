@@ -1,5 +1,5 @@
-import { resolveLogLevel, AnsiLogger, LogEntry, Mask } from '../AnsiLogger';
-import { IdentityTransformer } from '../IdentityTransformer';
+import { resolveLogLevel, AnsiLogger, LogEntry, Mask } from 'ansi-logger/AnsiLogger';
+import { IdentityTransformer } from 'ansi-logger/IdentityTransformer';
 
 describe('IdentityTransformer', () => {
 	describe('printer', () => {

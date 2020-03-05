@@ -1,13 +1,13 @@
-export { AnsiLogger as default } from './AnsiLogger';
-export * from './AnsiLogger';
-export * from './JSONTransformer';
-export * from './TextTransformer';
-export * from './IdentityTransformer';
+export { AnsiLogger as default } from 'ansi-logger/AnsiLogger';
+export * from 'ansi-logger/AnsiLogger';
+export * from 'ansi-logger/JSONTransformer';
+export * from 'ansi-logger/TextTransformer';
+export * from 'ansi-logger/IdentityTransformer';
 
+import { defaultLogLevel, AnsiLogger, Level, LoggerOptions, Transformer } from 'ansi-logger/AnsiLogger';
+import { JSONTransformer } from 'ansi-logger/JSONTransformer';
+import { TextTransformer } from 'ansi-logger/TextTransformer';
 import { Format } from 'cli-color';
-import { defaultLogLevel, AnsiLogger, Level, LoggerOptions, Transformer } from './AnsiLogger';
-import { JSONTransformer } from './JSONTransformer';
-import { TextTransformer } from './TextTransformer';
 
 /**
  * Create a simple text logger, generally used to output human readable

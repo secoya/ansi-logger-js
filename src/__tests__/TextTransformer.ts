@@ -1,5 +1,5 @@
-import { resolveLogLevel, AnsiLogger, LogEntry, Mask } from '../AnsiLogger';
-import { ColorMap, TextTransformer } from '../TextTransformer';
+import { resolveLogLevel, AnsiLogger, LogEntry, Mask } from 'ansi-logger/AnsiLogger';
+import { ColorMap, TextTransformer } from 'ansi-logger/TextTransformer';
 
 describe('TextTransformer', () => {
 	describe('printer default', () => {

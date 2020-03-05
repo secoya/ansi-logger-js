@@ -1,6 +1,6 @@
-import { resolveLogLevel } from '../AnsiLogger';
-import AnsiLogger, { JSONTransformer, Level, Mask } from '../index';
-import { TextTransformer } from '../TextTransformer';
+import AnsiLogger, { JSONTransformer, Level, Mask } from 'ansi-logger';
+import { resolveLogLevel } from 'ansi-logger/AnsiLogger';
+import { TextTransformer } from 'ansi-logger/TextTransformer';
 // tslint:disable:max-line-length
 
 const mockTimeformat = '0000-00-00 00:00:00';

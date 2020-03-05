@@ -1,4 +1,4 @@
-import { LogEntry, Transformer } from './AnsiLogger';
+import { LogEntry, Transformer } from 'ansi-logger/AnsiLogger';
 
 /**
  * The identity transformer makes no transformation to the log entry

@@ -1,4 +1,10 @@
 {
 	"extends": "./tsconfig.json",
-	"exclude": ["node_modules", "**/__tests__/*", "**/__mocks__/*", "./src/cli.ts"]
+	"compilerOptions": {
+		"declaration": true,
+		"sourceMap": true,
+		"sourceRoot": "./",
+		"outDir": "./package"
+	},
+	"exclude": ["node_modules", "**/__tests__/*", "**/__mocks__/*", "package"]
 }

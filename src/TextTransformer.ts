@@ -1,4 +1,4 @@
-import * as clc from 'cli-color';
+import clc from 'cli-color';
 import { matchMask, resolveLogLevel, LogEntry, Mask, Transformer } from './AnsiLogger';
 
 /**

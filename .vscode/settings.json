@@ -1,7 +1,12 @@
 {
-    "[jest-snapshot]": {
-        "files.insertFinalNewline": false,
-        "files.trimTrailingWhitespace": false
-    },
-    "jest.pathToConfig": "./jest.config.json"
+	"[jest-snapshot]": {
+		"files.insertFinalNewline": false,
+		"files.trimTrailingWhitespace": false
+	},
+	"jest.pathToConfig": "./jest.config.js",
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"licenser.author": "Brian Kejlberg",
+	"licenser.disableAutoHeaderInsertion": true,
+	"licenser.license": "BSD3",
+	"licenser.projectName": "ansi-logger"
 }

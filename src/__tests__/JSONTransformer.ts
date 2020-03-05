@@ -1,5 +1,5 @@
-import { resolveLogLevel, AnsiLogger, LogEntry, Mask } from '../AnsiLogger';
-import { JSONTransformer } from '../JSONTransformer';
+import { resolveLogLevel, AnsiLogger, LogEntry, Mask } from 'ansi-logger/AnsiLogger';
+import { JSONTransformer } from 'ansi-logger/JSONTransformer';
 
 describe('JSONTransformer', () => {
 	describe('printer default', () => {

@@ -38,10 +38,10 @@ ansi-logger -f ./big.log | less
 tail -f ./big.log | grep --line-buffered 'UserID: 4' | ansi-logger -t10 -mWARN,DEBUG
 `;
 
+import { matchMask, Level, LogEntry, Mask, TextTransformer } from 'ansi-logger';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
-import { matchMask, Level, LogEntry, Mask, TextTransformer } from '..';
 
 interface ArgDefinitionShort {
 	long?: string;

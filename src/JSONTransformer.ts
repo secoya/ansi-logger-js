@@ -1,5 +1,5 @@
+import { LogEntry, Transformer } from 'ansi-logger/AnsiLogger';
 import { inspect } from 'util';
-import { LogEntry, Transformer } from './AnsiLogger';
 
 /**
  * Transform log entries JSON encoded string output.
