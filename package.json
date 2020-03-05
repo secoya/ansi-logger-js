@@ -58,5 +58,5 @@
 		"prepublishOnly": "yarn test && yarn lint && yarn build"
 	},
 	"types": "index.d.ts",
-	"version": "4.4.0-rc.1"
+	"version": "4.4.0"
 }
