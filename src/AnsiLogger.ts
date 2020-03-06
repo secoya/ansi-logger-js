@@ -1,4 +1,4 @@
-import moment from 'moment';
+import * as moment from 'moment';
 
 /**
  * The internal data structure, that represents a single log entry.

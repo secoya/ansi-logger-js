@@ -2,7 +2,7 @@ import { defaultLogLevel, AnsiLogger, Level } from 'ansi-logger/AnsiLogger';
 import { createJSONLogger, createLoggerFromEnvironment, createTextLogger } from 'ansi-logger/index';
 import { JSONTransformer } from 'ansi-logger/JSONTransformer';
 import { TextTransformer } from 'ansi-logger/TextTransformer';
-import clc from 'cli-color';
+import * as clc from 'cli-color';
 
 describe('createTextLogger', () => {
 	test('creates a logger with text transformer', () => {
