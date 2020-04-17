@@ -44,7 +44,7 @@
 	"name": "ansi-logger",
 	"optionalDependencies": {
 		"@types/cli-color": "^2.0.0",
-		"@types/node": ">=8.10.10"
+		"@types/node": ">=12.12.35"
 	},
 	"private": true,
 	"repository": "https://github.com/secoya/ansi-logger-js",
