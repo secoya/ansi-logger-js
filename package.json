@@ -13,7 +13,7 @@
 	],
 	"dependencies": {
 		"cli-color": "2.0.0",
-		"moment": "2.24.0",
+		"moment": "2.29.2",
 		"tslib": "1.11.1"
 	},
 	"description": "Console logger with support for colors and log levels, it complies to the default console.log interface, with methods like log,error,warn,debug and extended with some extra levels for nice formatting purposes.",
